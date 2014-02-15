@@ -60,7 +60,8 @@ var DummyScraper = (function (_super) {
             { Artist: "Artist 2 " + this.suffix, Track: "Track 3 " + this.suffix },
             { Artist: "Artist 3 " + this.suffix, Track: "Track 3 " + this.suffix }
         ];
-        return callback(null, songs[Math.random() * songs.length]);
+        var index = Math.floor(Math.random() * songs.length);
+        return callback(null, songs[index]);
     };
     return DummyScraper;
 })(Scraper);
