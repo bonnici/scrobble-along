@@ -1,3 +1,5 @@
+/// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
+/// <reference path="../definitions/typescript-node-definitions/request.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -5,6 +7,9 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 
+
+var request = require("request");
+var winston = require("winston");
 
 // Abstract base class
 var Scraper = (function () {
@@ -23,26 +28,25 @@ var Scraper = (function () {
 
     // protected
     Scraper.prototype.fetchUrlWithHeaders = function (fullUrl, headers, callback) {
-        //todo
-        return callback(null, "body");
-        //winston.info("Fetching URL", fullUrl);
-        //winston.info("With headers", headers);
-        /*
+        winston.info("Fetching URL", fullUrl);
+        if (headers) {
+            winston.info("With headers", headers);
+        }
         request({ url: fullUrl, headers: headers }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-        return success(body);
-        }
-        
-        if (error) {
-        winston.error("Error requesting URL " + fullUrl, error);
-        return failure("Error during request");
-        }
-        else {
-        return failure("Bad status code (" + response.statusCode + ") fetching URL " + fullUrl);
-        }
-        
+            if (!error && response.statusCode == 200) {
+                return callback(null, body);
+            }
+
+            if (error) {
+                var errorStr = "Error requesting URL " + fullUrl;
+                winston.error(errorStr, error);
+                return callback(errorStr, null);
+            } else {
+                var errorStr = "Bad status code (" + response.statusCode + ") fetching URL " + fullUrl;
+                winston.warn(errorStr);
+                return callback(errorStr, null);
+            }
         });
-        */
     };
     return Scraper;
 })();

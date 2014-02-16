@@ -1,0 +1,12 @@
+{
+  "name": "scrobble-along-scrapper"
+  , "version": "0.0.1"
+  , "private": true
+  , "dependencies": {
+      "cheerio": "0.13.x"
+    , "moment": "2.5.x"
+    , "moment-timezone": "0.0.x"
+    , "request": "2.33.x"
+    , "winston": "0.7.x"
+  }
+}

@@ -1,4 +1,10 @@
+/// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
+/// <reference path="../definitions/typescript-node-definitions/request.d.ts"/>
+
 import song = require("./Song");
+
+import request = require("request");
+import winston = require("winston");
 
 // Abstract base class
 export class Scraper {
@@ -16,26 +22,27 @@ export class Scraper {
 
 	// protected
 	public fetchUrlWithHeaders(fullUrl: string, headers, callback: (err, body:string) => void): void {
-		//todo
-		return callback(null, "body");
-		//winston.info("Fetching URL", fullUrl);
-		//winston.info("With headers", headers);
-		/*
+		winston.info("Fetching URL", fullUrl);
+		if (headers) {
+			winston.info("With headers", headers);
+		}
 		request({ url: fullUrl, headers: headers }, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
-				return success(body);
+				return callback(null, body);
 			}
 
 			if (error) {
-				winston.error("Error requesting URL " + fullUrl, error);
-				return failure("Error during request");
+				var errorStr = "Error requesting URL " + fullUrl;
+				winston.error(errorStr, error);
+				return callback(errorStr, null);
 			}
 			else {
-				return failure("Bad status code (" + response.statusCode + ") fetching URL " + fullUrl);
+				var errorStr = "Bad status code (" + response.statusCode + ") fetching URL " + fullUrl;
+				winston.warn(errorStr);
+				return callback(errorStr, null);
 			}
 
 		});
-		*/
 	}
 }
 
