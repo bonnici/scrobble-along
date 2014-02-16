@@ -2,7 +2,7 @@
 /// <reference path="../../definitions/dummy-definitions/moment-timezone.d.ts"/>
 
 import song = require("../Song");
-import scrap = require("../Scraper");
+import scrap = require("Scraper");
 
 import util = require("util");
 import cheerio = require("cheerio");
@@ -29,7 +29,8 @@ export class KexpScraper extends scrap.Scraper {
 
 	// Separated so that it is mockable
 	private startTime(): string {
-		return this.defaultStartTime || moment().tz("America/Los_Angeles").subtract('minutes', 30).format("YYYY-MM-DDTHH:mm:ss.SSS");
+		return this.defaultStartTime ||
+			moment().tz("America/Los_Angeles").subtract('minutes', 30).format("YYYY-MM-DDTHH:mm:ss.SSS");
 	}
 
 	private parse(body: string, callback:(err, song:song.Song) => void): void {

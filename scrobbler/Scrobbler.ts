@@ -1,5 +1,5 @@
 import stat = require("./Station");
-import scrap = require("./Scraper");
+import scrap = require("./scrapers/Scraper");
 
 //import _ = require("underscore");
 

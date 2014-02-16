@@ -1,5 +1,5 @@
 import scrob = require("./Scrobbler");
-import scrap = require("./Scraper");
+import scrap = require("./scrapers/Scraper");
 import kexp = require("./scrapers/KexpScraper");
 import stat = require("./Station");
 import statDao = require("./StationDao");

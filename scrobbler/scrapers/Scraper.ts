@@ -1,7 +1,7 @@
-/// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
-/// <reference path="../definitions/typescript-node-definitions/request.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/request.d.ts"/>
 
-import song = require("./Song");
+import song = require("../Song");
 
 import request = require("request");
 import winston = require("winston");
@@ -17,7 +17,7 @@ export class Scraper {
 
 	// protected
 	public fetchUrl(fullUrl: string, callback: (err, body:string) => void): void {
-		return this.fetchUrlWithHeaders(fullUrl, {}, callback);
+		return this.fetchUrlWithHeaders(fullUrl, null, callback);
 	}
 
 	// protected
@@ -26,7 +26,7 @@ export class Scraper {
 		if (headers) {
 			winston.info("With headers", headers);
 		}
-		request({ url: fullUrl, headers: headers }, function (error, response, body) {
+		request({ url: fullUrl, headers: headers || {} }, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
 				return callback(null, body);
 			}

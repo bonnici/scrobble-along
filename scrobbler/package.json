@@ -6,6 +6,7 @@
       "cheerio": "0.13.x"
     , "moment": "2.5.x"
     , "moment-timezone": "0.0.x"
+    , "nock": "0.27.x"
     , "request": "2.33.x"
     , "winston": "0.7.x"
   }

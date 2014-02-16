@@ -1,5 +1,5 @@
-/// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
-/// <reference path="../definitions/typescript-node-definitions/request.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/request.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -23,7 +23,7 @@ var Scraper = (function () {
 
     // protected
     Scraper.prototype.fetchUrl = function (fullUrl, callback) {
-        return this.fetchUrlWithHeaders(fullUrl, {}, callback);
+        return this.fetchUrlWithHeaders(fullUrl, null, callback);
     };
 
     // protected
@@ -32,7 +32,7 @@ var Scraper = (function () {
         if (headers) {
             winston.info("With headers", headers);
         }
-        request({ url: fullUrl, headers: headers }, function (error, response, body) {
+        request({ url: fullUrl, headers: headers || {} }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 return callback(null, body);
             }

@@ -1,5 +1,5 @@
 var scrob = require("./Scrobbler");
-var scrap = require("./Scraper");
+var scrap = require("./scrapers/Scraper");
 var kexp = require("./scrapers/KexpScraper");
 
 var statDao = require("./StationDao");

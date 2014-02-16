@@ -7,7 +7,7 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 
-var scrap = require("../Scraper");
+var scrap = require("./Scraper");
 
 var util = require("util");
 var cheerio = require("cheerio");
