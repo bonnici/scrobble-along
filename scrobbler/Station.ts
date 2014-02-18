@@ -1,5 +1,5 @@
 export interface Station {
 	StationName: string;
-	ParserName: string;
+	ScraperName: string;
 	Session: string;
 }

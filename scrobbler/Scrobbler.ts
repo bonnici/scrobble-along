@@ -10,8 +10,8 @@ export class Scrobbler {
 	scrapeAndScrobble(stations:stat.Station[]): void {
 		//console.log("testing " + this.test + " " + x);
 		for (var i = 0; i < stations.length; i++) {
-			console.log(stations[i].StationName + " " + stations[i].ParserName);
-			var scraper = this.scrapers[stations[i].ParserName];
+			//console.log(stations[i].StationName + " " + stations[i].ScraperName);
+			var scraper = this.scrapers[stations[i].ScraperName];
 			if (scraper) {
 				scraper.fetchAndParse((err, song) => {
 					if (!err) {

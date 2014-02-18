@@ -8,8 +8,8 @@ var Scrobbler = (function () {
     }
     Scrobbler.prototype.scrapeAndScrobble = function (stations) {
         for (var i = 0; i < stations.length; i++) {
-            console.log(stations[i].StationName + " " + stations[i].ParserName);
-            var scraper = this.scrapers[stations[i].ParserName];
+            //console.log(stations[i].StationName + " " + stations[i].ScraperName);
+            var scraper = this.scrapers[stations[i].ScraperName];
             if (scraper) {
                 scraper.fetchAndParse(function (err, song) {
                     if (!err) {

@@ -5,9 +5,9 @@ var DummyStationDao = (function () {
     }
     DummyStationDao.prototype.getStations = function (callback) {
         return callback(null, [
-            { StationName: "Station 1", ParserName: "Parser1", Session: "" },
-            { StationName: "Station 2", ParserName: "Parser2", Session: "" },
-            { StationName: "Station 3", ParserName: "Parser1", Session: "" }
+            { StationName: "Station 1", ScraperName: "Scraper1", Session: "" },
+            { StationName: "Station 2", ScraperName: "Scraper2", Session: "" },
+            { StationName: "Station 3", ScraperName: "Scraper1", Session: "" }
         ]);
     };
     return DummyStationDao;

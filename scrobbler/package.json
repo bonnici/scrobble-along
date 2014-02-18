@@ -9,5 +9,6 @@
     , "nock": "0.27.x"
     , "request": "2.33.x"
     , "winston": "0.7.x"
+    , "underscore": "1.6.x"
   }
 }

@@ -1,17 +1,19 @@
 /// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/dummy-definitions/moment-timezone.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-
 var scrap = require("./Scraper");
 
-var util = require("util");
+
 var cheerio = require("cheerio");
 var moment = require('moment-timezone');
+var util = require("util");
+var winston = require("winston");
 
 var KexpScraper = (function (_super) {
     __extends(KexpScraper, _super);
@@ -42,14 +44,17 @@ var KexpScraper = (function (_super) {
         var nowPlayingDiv = $.root().children('div').first();
 
         if (nowPlayingDiv.hasClass("AirBreak")) {
+            winston.info("KexpScraper found an air break");
             return callback(null, { Artist: null, Track: null });
         } else if (nowPlayingDiv.hasClass("Play")) {
             var artist = nowPlayingDiv.find("div.ArtistName").text();
             var track = nowPlayingDiv.find("div.TrackName").text();
 
             if (artist && track) {
+                winston.info("KexpScraper found song " + artist + " - " + track);
                 return callback(null, { Artist: artist, Track: track });
             } else {
+                winston.info("KexpScraper could not find a song");
                 return callback(null, { Artist: null, Track: null });
             }
         }

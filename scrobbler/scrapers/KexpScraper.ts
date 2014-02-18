@@ -1,12 +1,14 @@
 /// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/dummy-definitions/moment-timezone.d.ts"/>
+/// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 
-import song = require("../Song");
 import scrap = require("Scraper");
+import song = require("../Song");
 
-import util = require("util");
 import cheerio = require("cheerio");
 import moment = require('moment-timezone');
+import util = require("util");
+import winston = require("winston");
 
 export class KexpScraper extends scrap.Scraper {
 	public defaultStartTime: string = null; // Overridable for tests
@@ -39,6 +41,7 @@ export class KexpScraper extends scrap.Scraper {
 
 		// Check for airbreak
 		if (nowPlayingDiv.hasClass("AirBreak")) {
+			winston.info("KexpScraper found an air break");
 			return callback(null, { Artist: null, Track: null });
 		}
 		else if (nowPlayingDiv.hasClass("Play")) {
@@ -46,9 +49,11 @@ export class KexpScraper extends scrap.Scraper {
 			var track = nowPlayingDiv.find("div.TrackName").text();
 
 			if (artist && track) {
+				winston.info("KexpScraper found song " + artist + " - " + track);
 				return callback(null, { Artist: artist, Track: track });
 			}
 			else {
+				winston.info("KexpScraper could not find a song");
 				return callback(null, { Artist: null, Track: null });
 			}
 		}
