@@ -44,13 +44,13 @@ export class NnmScraper extends scrap.Scraper {
 				}
 
 				var fullUrl2 = util.format(this.jsonUrl2, this.startTime());
-				this.tryParseJson(fullUrl2,  (err, jsonSong2) => {
+				this.tryParseJson(fullUrl2, (err, jsonSong2) => {
 					if (!err) {
 						winston.info("NnmScraper found song from JSON URL 2", jsonSong2);
 						return callback(null, jsonSong2);
 					}
 					winston.info("NnmScraper could not find song");
-					return callback("Could not find song", null);
+					return callback(err, null);
 				});
 			});
 		});

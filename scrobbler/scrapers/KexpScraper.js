@@ -53,11 +53,11 @@ var KexpScraper = (function (_super) {
             if (artist && track) {
                 winston.info("KexpScraper found song " + artist + " - " + track);
                 return callback(null, { Artist: artist, Track: track });
-            } else {
-                winston.info("KexpScraper could not find a song");
-                return callback(null, { Artist: null, Track: null });
             }
         }
+
+        winston.info("KexpScraper could not find a song");
+        return callback(null, { Artist: null, Track: null });
     };
     return KexpScraper;
 })(scrap.Scraper);

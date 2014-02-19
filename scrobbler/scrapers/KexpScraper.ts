@@ -52,10 +52,9 @@ export class KexpScraper extends scrap.Scraper {
 				winston.info("KexpScraper found song " + artist + " - " + track);
 				return callback(null, { Artist: artist, Track: track });
 			}
-			else {
-				winston.info("KexpScraper could not find a song");
-				return callback(null, { Artist: null, Track: null });
-			}
 		}
+
+		winston.info("KexpScraper could not find a song");
+		return callback(null, { Artist: null, Track: null });
 	}
 }
