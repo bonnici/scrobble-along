@@ -30,7 +30,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	None: null,
 	KEXP: new kexp.KexpScraper(),
 	NNM: new nnm.NnmScraper(),
-	JJJ: new jjj.JjjScraper(), //ok
+	JJJ: new jjj.JjjScraper(),
 	Unearthed: new jjj.JjjScraper("http://www.abc.net.au/triplej/feeds/playout/unearthed_playout.xml"),
 	SomaIndiePop: new soma.SomaScraper("indiepop"),
 	SomaLush: new soma.SomaScraper("lush"),
@@ -40,7 +40,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	C895: new c895.C895Scraper(),
 	KCRWEclectic24: new kcrwEclectic24.KcrwEclectic24Scraper(),
 	KCQN: new kcqn.KcqnScraper(),
-	Gold: new goldRadio.GoldRadioScraper(), //ok
+	Gold: new goldRadio.GoldRadioScraper(),
 	WFMU: new wfmu.WfmuScraper(),
 	KCRW: new kcrw.KcrwScraper(),
 	XFM: new xfm.XfmScraper(),
@@ -49,10 +49,10 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	WFUV: new wfuv.WfuvScraper("wfuv"),
 	FUVAllMusic: new wfuv.WfuvScraper("hd2"),
 	AlternateSide: new wfuv.WfuvScraper("hd3"),
-	DigMusic: new digMusic.DigMusicScraper(), //ok
+	DigMusic: new digMusic.DigMusicScraper(),
 	WZBC: new wzbc.WzbcScraper(),
 	PlayFM: new playFm.PlayFmScraper(),
-	ABCJazz: new digMusic.DigMusicScraper("http://abcjazz.net.au/player-data.php"), //ok
+	ABCJazz: new digMusic.DigMusicScraper("http://abcjazz.net.au/player-data.php"),
 	TheCurrent: new theCurrent.TheCurrentScraper()
 };
 
@@ -73,32 +73,32 @@ setInterval(
 */
 
 var stations = [
-	//{ StationName: "KEXP", ScraperName: "KEXP", Session: "" },
-	//{ StationName: "NewNormalMusic", ScraperName: "NNM", Session: "" },
-	//{ StationName: "Triple J", ScraperName: "JJJ", Session: "" },
-	//{ StationName: "Triple J Unearthed", ScraperName: "Unearthed", Session: "" },
-	//{ StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "" },
-	//{ StationName: "SomaLush", ScraperName: "SomaLush", Session: "" },
-	//{ StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "" },
-	//{ StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "" },
-	//{ StationName: "TheEnd", ScraperName: "TheEnd", Session: "" },
-	//{ StationName: "C895", ScraperName: "C895", Session: "" },
-	//{ StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "" },
-	//{ StationName: "KCQN", ScraperName: "KCQN", Session: "" },
-	//{ StationName: "Gold", ScraperName: "Gold", Session: "" },
-	//{ StationName: "WFMU", ScraperName: "WFMU", Session: "" },
-	//{ StationName: "KCRW", ScraperName: "KCRW", Session: "" },
-	//{ StationName: "XFM", ScraperName: "XFM", Session: "" },
-	//{ StationName: "PunkFM", ScraperName: "PunkFM", Session: "" },
-	//{ StationName: "Andys80s", ScraperName: "Andys80s", Session: "" },
-	{ StationName: "WFUV", ScraperName: "WFUV", Session: "" },
-	//{ StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "" },
-	//{ StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "" },
-	//{ StationName: "DigMusic", ScraperName: "DigMusic", Session: "" },
-	//{ StationName: "WZBC", ScraperName: "WZBC", Session: "" },
-	//{ StationName: "PlayFM", ScraperName: "PlayFM", Session: "" },
-	//{ StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "" },
-	//{ StationName: "TheCurrent", ScraperName: "TheCurrent", Session: "" }
+	{ ScraperName: "KEXP", Session: "" },
+	{ ScraperName: "NNM", Session: "" },
+	{ ScraperName: "JJJ", Session: "" },
+	{ ScraperName: "Unearthed", Session: "" },
+	{ ScraperName: "SomaIndiePop", Session: "" },
+	{ ScraperName: "SomaLush", Session: "" },
+	{ ScraperName: "SomaUnderground80s", Session: "" },
+	{ ScraperName: "HollowEarth", Session: "" },
+	{ ScraperName: "TheEnd", Session: "" },
+	{ ScraperName: "C895", Session: "" },
+	{ ScraperName: "KCRWEclectic24", Session: "" },
+	{ ScraperName: "KCQN", Session: "" },
+	{ ScraperName: "Gold", Session: "" },
+	{ ScraperName: "WFMU", Session: "" },
+	{ ScraperName: "KCRW", Session: "" },
+	{ ScraperName: "XFM", Session: "" },
+	{ ScraperName: "PunkFM", Session: "" },
+	{ ScraperName: "Andys80s", Session: "" },
+	{ ScraperName: "WFUV", Session: "" },
+	{ ScraperName: "FUVAllMusic", Session: "" },
+	{ ScraperName: "AlternateSide", Session: "" },
+	{ ScraperName: "DigMusic", Session: "" },
+	{ ScraperName: "WZBC", Session: "" },
+	{ ScraperName: "PlayFM", Session: "" },
+	{ ScraperName: "ABCJazz", Session: "" },
+	{ ScraperName: "TheCurrent", Session: "" }
 ];
 
 /*
@@ -107,4 +107,4 @@ setInterval(
 		scrobbler.scrapeAndScrobble(stations);
 	} , interval);
 */
-scrobbler.scrapeAndScrobble(stations)
+scrobbler.scrapeAndScrobble(stations);

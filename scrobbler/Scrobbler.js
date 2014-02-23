@@ -67,7 +67,7 @@ var Scrobbler = (function () {
 
             stationData.lastUpdatedTime = timestamp;
 
-            if (newSong != stationData.nowPlayingSong) {
+            if (!newSong || !stationData.nowPlayingSong || newSong.Artist != stationData.nowPlayingSong.Artist || newSong.Track != stationData.nowPlayingSong.Track) {
                 _this.scrobbleNowPlayingIfValid(stationData, timestamp);
                 stationData.nowPlayingSong = newSong;
                 stationData.nowPlayingStarted = timestamp;

@@ -9,7 +9,7 @@ import scrap = require("../../scrapers/Scraper");
 
 describe("Scraper", () => {
 
-	describe("#fetchUrl()", () => {
+	describe("fetchUrl", () => {
 
 		it('should return data if get request succeeds', () => {
 			var host = "http://kexp.org";

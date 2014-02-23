@@ -39,7 +39,7 @@ export class Scrobbler {
 	}
 
 	scrapeAndScrobble(stations:stat.Station[], timestamp?:number): void {
-		timestamp = timestamp || new Date().getTime(); //?
+		timestamp = timestamp || new Date().getTime();
 
 		for (var i = 0; i < stations.length; i++) {
 			var scraperName = stations[i].ScraperName;
@@ -76,7 +76,9 @@ export class Scrobbler {
 
 			stationData.lastUpdatedTime = timestamp;
 
-			if (newSong != stationData.nowPlayingSong) {
+			if (!newSong || !stationData.nowPlayingSong || newSong.Artist != stationData.nowPlayingSong.Artist ||
+				newSong.Track != stationData.nowPlayingSong.Track) {
+
 				this.scrobbleNowPlayingIfValid(stationData, timestamp);
 				stationData.nowPlayingSong = newSong;
 				stationData.nowPlayingStarted = timestamp;
@@ -113,14 +115,3 @@ export class Scrobbler {
 		}
 	}
 }
-
-/* 
- possible sequences
- null -> song1 -> null (should have posted now playing once but not scrobbled, song1 was not playing long enough)
- null -> song1 -> song1 -> null (should have posted now playing twice and scrobbled song1)
- song1 -> song1 -> song2 (should have posted now playing 3 times and scrobbled song1)
- song1 -> song2 -> song3 (should have posted now playing 3 times and not scrobbled)
- song1 -> error -> song1 -> null (should post now playing twice and scrobbled song1)
- song1 -> error -> song2 -> null (should post now playing twice and scrobbled song1)
- song1 -> error -> error -> error -> etc -> song1 -> null (should post now playing twice and not scrobbled)
- */

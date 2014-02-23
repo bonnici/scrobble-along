@@ -7,7 +7,7 @@ var nock = require("nock");
 var scrap = require("../../scrapers/Scraper");
 
 describe("Scraper", function () {
-    describe("#fetchUrl()", function () {
+    describe("fetchUrl", function () {
         it('should return data if get request succeeds', function () {
             var host = "http://kexp.org";
             var path = "/playlist/playlistupdates?channel=1&start=2012-11-23T19:30:00.0&since=2012-11-23T19:30:00.0";
