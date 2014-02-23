@@ -43,7 +43,7 @@ export class KcrwEclectic24Scraper extends scrap.Scraper {
 			return callback(null, { Artist: null, Track: null });
 		}
 
-		winston.info("TheEndScraper found song " + json.artist + " - " + json.track);
+		winston.info("KCRWEclectic24Scraper found song " + json.artist + " - " + json.title);
 		return callback(null, { Artist: json.artist, Track: json.title });
 	}
 }

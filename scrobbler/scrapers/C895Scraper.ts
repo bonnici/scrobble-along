@@ -31,7 +31,7 @@ export class C895Scraper extends scrap.Scraper {
 
 		var $ = cheerio.load(body);
 
-		var playlistRows = $('table#playlisttable tr');
+		var playlistRows = $('table#playlist tr');
 
 		if (playlistRows.length < 1) {
 			winston.warn("C895Scraper: Not enough playlist rows (" + playlistRows.length + ")");

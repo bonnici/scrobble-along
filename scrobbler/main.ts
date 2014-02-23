@@ -2,6 +2,7 @@ import scrap = require("./scrapers/Scraper");
 import scrob = require("./Scrobbler");
 import stat = require("./Station");
 import statDao = require("./StationDao");
+import lfmDao = require("./LastFmDao");
 
 import kexp = require("./scrapers/KexpScraper");
 import nnm = require("./scrapers/NnmScraper");
@@ -26,12 +27,10 @@ import theCurrent = require("./scrapers/TheCurrentScraper");
 
 var interval = 15000; // 15 seconds
 var scrapers:{ [index: string]: scrap.Scraper; } = {
-	Scraper1: new scrap.DummyScraper("Suffix 1"),
-	Scraper2: new scrap.DummyScraper("Suffix 2"),
 	None: null,
 	KEXP: new kexp.KexpScraper(),
 	NNM: new nnm.NnmScraper(),
-	JJJ: new jjj.JjjScraper(),
+	JJJ: new jjj.JjjScraper(), //ok
 	Unearthed: new jjj.JjjScraper("http://www.abc.net.au/triplej/feeds/playout/unearthed_playout.xml"),
 	SomaIndiePop: new soma.SomaScraper("indiepop"),
 	SomaLush: new soma.SomaScraper("lush"),
@@ -41,7 +40,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	C895: new c895.C895Scraper(),
 	KCRWEclectic24: new kcrwEclectic24.KcrwEclectic24Scraper(),
 	KCQN: new kcqn.KcqnScraper(),
-	Gold: new goldRadio.GoldRadioScraper(),
+	Gold: new goldRadio.GoldRadioScraper(), //ok
 	WFMU: new wfmu.WfmuScraper(),
 	KCRW: new kcrw.KcrwScraper(),
 	XFM: new xfm.XfmScraper(),
@@ -50,15 +49,16 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	WFUV: new wfuv.WfuvScraper("wfuv"),
 	FUVAllMusic: new wfuv.WfuvScraper("hd2"),
 	AlternateSide: new wfuv.WfuvScraper("hd3"),
-	DigMusic: new digMusic.DigMusicScraper(),
+	DigMusic: new digMusic.DigMusicScraper(), //ok
 	WZBC: new wzbc.WzbcScraper(),
 	PlayFM: new playFm.PlayFmScraper(),
-	ABCJazz: new digMusic.DigMusicScraper("http://abcjazz.net.au/player-data.php"),
+	ABCJazz: new digMusic.DigMusicScraper("http://abcjazz.net.au/player-data.php"), //ok
 	TheCurrent: new theCurrent.TheCurrentScraper()
 };
 
-var scrobbler = new scrob.Scrobbler(scrapers);
 var stationDao = new statDao.DummyStationDao();
+var lastFmDao = new lfmDao.DummyLastFmDao();
+var scrobbler = new scrob.Scrobbler(scrapers, lastFmDao);
 
 /*
 setInterval(
@@ -72,34 +72,39 @@ setInterval(
 , interval);
 */
 
+var stations = [
+	//{ StationName: "KEXP", ScraperName: "KEXP", Session: "" },
+	//{ StationName: "NewNormalMusic", ScraperName: "NNM", Session: "" },
+	//{ StationName: "Triple J", ScraperName: "JJJ", Session: "" },
+	//{ StationName: "Triple J Unearthed", ScraperName: "Unearthed", Session: "" },
+	//{ StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "" },
+	//{ StationName: "SomaLush", ScraperName: "SomaLush", Session: "" },
+	//{ StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "" },
+	//{ StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "" },
+	//{ StationName: "TheEnd", ScraperName: "TheEnd", Session: "" },
+	//{ StationName: "C895", ScraperName: "C895", Session: "" },
+	//{ StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "" },
+	//{ StationName: "KCQN", ScraperName: "KCQN", Session: "" },
+	//{ StationName: "Gold", ScraperName: "Gold", Session: "" },
+	//{ StationName: "WFMU", ScraperName: "WFMU", Session: "" },
+	//{ StationName: "KCRW", ScraperName: "KCRW", Session: "" },
+	//{ StationName: "XFM", ScraperName: "XFM", Session: "" },
+	//{ StationName: "PunkFM", ScraperName: "PunkFM", Session: "" },
+	//{ StationName: "Andys80s", ScraperName: "Andys80s", Session: "" },
+	{ StationName: "WFUV", ScraperName: "WFUV", Session: "" },
+	//{ StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "" },
+	//{ StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "" },
+	//{ StationName: "DigMusic", ScraperName: "DigMusic", Session: "" },
+	//{ StationName: "WZBC", ScraperName: "WZBC", Session: "" },
+	//{ StationName: "PlayFM", ScraperName: "PlayFM", Session: "" },
+	//{ StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "" },
+	//{ StationName: "TheCurrent", ScraperName: "TheCurrent", Session: "" }
+];
+
+/*
 setInterval(
 	() => {
-		scrobbler.scrapeAndScrobble([
-			{ StationName: "KEXP", ScraperName: "KEXP", Session: "" },
-			{ StationName: "NewNormalMusic", ScraperName: "NNM", Session: "" },
-			{ StationName: "Triple J", ScraperName: "JJJ", Session: "" },
-			{ StationName: "Triple J Unearthed", ScraperName: "Unearthed", Session: "" },
-			{ StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "" },
-			{ StationName: "SomaLush", ScraperName: "SomaLush", Session: "" },
-			{ StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "" },
-			{ StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "" },
-			{ StationName: "TheEnd", ScraperName: "TheEnd", Session: "" },
-			{ StationName: "C895", ScraperName: "C895", Session: "" },
-			{ StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "" },
-			{ StationName: "KCQN", ScraperName: "KCQN", Session: "" },
-			{ StationName: "Gold", ScraperName: "Gold", Session: "" },
-			{ StationName: "WFMU", ScraperName: "WFMU", Session: "" },
-			{ StationName: "KCRW", ScraperName: "KCRW", Session: "" },
-			{ StationName: "XFM", ScraperName: "XFM", Session: "" },
-			{ StationName: "PunkFM", ScraperName: "PunkFM", Session: "" },
-			{ StationName: "Andys80s", ScraperName: "Andys80s", Session: "" },
-			{ StationName: "WFUV", ScraperName: "WFUV", Session: "" },
-			{ StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "" },
-			{ StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "" },
-			{ StationName: "DigMusic", ScraperName: "DigMusic", Session: "" },
-			{ StationName: "WZBC", ScraperName: "WZBC", Session: "" },
-			{ StationName: "PlayFM", ScraperName: "PlayFM", Session: "" },
-			{ StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "" },
-			{ StationName: "TheCurrent", ScraperName: "TheCurrent", Session: "" }
-		]);
+		scrobbler.scrapeAndScrobble(stations);
 	} , interval);
+*/
+scrobbler.scrapeAndScrobble(stations)

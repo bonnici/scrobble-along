@@ -1,7 +1,8 @@
-var scrap = require("./scrapers/Scraper");
+
 var scrob = require("./Scrobbler");
 
 var statDao = require("./StationDao");
+var lfmDao = require("./LastFmDao");
 
 var kexp = require("./scrapers/KexpScraper");
 var nnm = require("./scrapers/NnmScraper");
@@ -26,8 +27,6 @@ var theCurrent = require("./scrapers/TheCurrentScraper");
 
 var interval = 15000;
 var scrapers = {
-    Scraper1: new scrap.DummyScraper("Suffix 1"),
-    Scraper2: new scrap.DummyScraper("Suffix 2"),
     None: null,
     KEXP: new kexp.KexpScraper(),
     NNM: new nnm.NnmScraper(),
@@ -57,8 +56,9 @@ var scrapers = {
     TheCurrent: new theCurrent.TheCurrentScraper()
 };
 
-var scrobbler = new scrob.Scrobbler(scrapers);
 var stationDao = new statDao.DummyStationDao();
+var lastFmDao = new lfmDao.DummyLastFmDao();
+var scrobbler = new scrob.Scrobbler(scrapers, lastFmDao);
 
 /*
 setInterval(
@@ -71,35 +71,34 @@ scrobbler.scrapeAndScrobble(stations);
 }
 , interval);
 */
-setInterval(function () {
-    scrobbler.scrapeAndScrobble([
-        { StationName: "KEXP", ScraperName: "KEXP", Session: "" },
-        { StationName: "NewNormalMusic", ScraperName: "NNM", Session: "" },
-        { StationName: "Triple J", ScraperName: "JJJ", Session: "" },
-        { StationName: "Triple J Unearthed", ScraperName: "Unearthed", Session: "" },
-        { StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "" },
-        { StationName: "SomaLush", ScraperName: "SomaLush", Session: "" },
-        { StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "" },
-        { StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "" },
-        { StationName: "TheEnd", ScraperName: "TheEnd", Session: "" },
-        { StationName: "C895", ScraperName: "C895", Session: "" },
-        { StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "" },
-        { StationName: "KCQN", ScraperName: "KCQN", Session: "" },
-        { StationName: "Gold", ScraperName: "Gold", Session: "" },
-        { StationName: "WFMU", ScraperName: "WFMU", Session: "" },
-        { StationName: "KCRW", ScraperName: "KCRW", Session: "" },
-        { StationName: "XFM", ScraperName: "XFM", Session: "" },
-        { StationName: "PunkFM", ScraperName: "PunkFM", Session: "" },
-        { StationName: "Andys80s", ScraperName: "Andys80s", Session: "" },
-        { StationName: "WFUV", ScraperName: "WFUV", Session: "" },
-        { StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "" },
-        { StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "" },
-        { StationName: "DigMusic", ScraperName: "DigMusic", Session: "" },
-        { StationName: "WZBC", ScraperName: "WZBC", Session: "" },
-        { StationName: "PlayFM", ScraperName: "PlayFM", Session: "" },
-        { StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "" },
-        { StationName: "TheCurrent", ScraperName: "TheCurrent", Session: "" }
-    ]);
-}, interval);
+var stations = [
+    //{ StationName: "KEXP", ScraperName: "KEXP", Session: "" },
+    //{ StationName: "NewNormalMusic", ScraperName: "NNM", Session: "" },
+    //{ StationName: "Triple J", ScraperName: "JJJ", Session: "" },
+    //{ StationName: "Triple J Unearthed", ScraperName: "Unearthed", Session: "" },
+    //{ StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "" },
+    //{ StationName: "SomaLush", ScraperName: "SomaLush", Session: "" },
+    //{ StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "" },
+    //{ StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "" },
+    //{ StationName: "TheEnd", ScraperName: "TheEnd", Session: "" },
+    //{ StationName: "C895", ScraperName: "C895", Session: "" },
+    //{ StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "" },
+    //{ StationName: "KCQN", ScraperName: "KCQN", Session: "" },
+    //{ StationName: "Gold", ScraperName: "Gold", Session: "" },
+    //{ StationName: "WFMU", ScraperName: "WFMU", Session: "" },
+    //{ StationName: "KCRW", ScraperName: "KCRW", Session: "" },
+    //{ StationName: "XFM", ScraperName: "XFM", Session: "" },
+    //{ StationName: "PunkFM", ScraperName: "PunkFM", Session: "" },
+    //{ StationName: "Andys80s", ScraperName: "Andys80s", Session: "" },
+    { StationName: "WFUV", ScraperName: "WFUV", Session: "" }
+];
+
+/*
+setInterval(
+() => {
+scrobbler.scrapeAndScrobble(stations);
+} , interval);
+*/
+scrobbler.scrapeAndScrobble(stations);
 
 //# sourceMappingURL=main.js.map

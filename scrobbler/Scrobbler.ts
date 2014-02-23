@@ -1,85 +1,126 @@
-import stat = require("./Station");
+import lfmDao = require("./LastFmDao");
 import scrap = require("./scrapers/Scraper");
+import song = require("./Song");
+import stat = require("./Station");
 
 //import _ = require("underscore");
-/*
-interface ScrobblerStationData {
-	nowPlayingSong: song.Song;
-	nowPlayingStarted: number; // timestamp
+import winston = require("winston");
+
+// Constants
+var UNKNOWN_SONG = { Artist: null, Track: null };
+var LAST_UPDATE_TIMEOUT = 60 * 1000; // Amount of time failures can occur before the song that was playing is scrobbled
+var MIN_SCROBBLE_TIME = 35 * 1000; // The minimum time a song has to play before it can be scrobbled
+
+class ScrobblerStationData {
+	public scraperName: string;
+	public nowPlayingSong: song.Song;
+	public nowPlayingStarted: number; // timestamp
+	public lastScrobbledSong: song.Song;
+	public lastUpdatedTime: number;
+
+	constructor(scraperName: string) {
+		this.scraperName = scraperName,
+		this.nowPlayingSong = UNKNOWN_SONG;
+		this.nowPlayingStarted = null;
+		this.lastScrobbledSong = null;
+		this.lastUpdatedTime = null;
+	}
 };
-*/
 
 export class Scrobbler {
+	private stationData:{ [index: string]: ScrobblerStationData; }
+	private scrapers:{ [index: string]: scrap.Scraper; }
+	private lastFmDao:lfmDao.LastFmDao;
 
-	// keep map of station -> { nowPlaying (Song), nowPlayingStart (moment), lastScrobble (Song), lastScrobbleStart (moment), consecutiveUpdateErrors (number), nowPlayingLastPosted (moment) }
-	// put this in an interface called ScrobblerStationData
+	constructor(scrapers:{ [index: string]: scrap.Scraper; }, lastFmDao:lfmDao.LastFmDao) {
+		this.scrapers = scrapers;
+		this.lastFmDao = lastFmDao;
+		this.stationData = {};
+	}
 
-	//private stationData:{ [index: string]: ScrobblerStationData; }
+	scrapeAndScrobble(stations:stat.Station[], timestamp?:number): void {
+		timestamp = timestamp || new Date().getTime(); //?
 
-	constructor(private scrapers:{ [index: string]: scrap.Scraper; } ) {}
-
-	scrapeAndScrobble(stations:stat.Station[]): void {
 		for (var i = 0; i < stations.length; i++) {
-
 			var scraperName = stations[i].ScraperName;
-			var scraper = this.scrapers[scraperName];
+			this.processScraper(scraperName, timestamp);
+		}
+	}
 
+	private processScraper(scraperName:string, timestamp:number): void {
+		var scraper = this.scrapers[scraperName];
+		var stationData = this.stationData[scraperName];
 
-			scraper.fetchAndParse((err, song) => {
-			    if (!err) {
-			        if (song) {
-				        console.log("Scraped song " + song.Artist + " - " + song.Track);
-				    }
-				    else {
-				        console.log("Could not scrape song");
-				    }
-			    }
-			});
+		if (!scraper) {
+			winston.error("Attempted to process invalid scraper:", scraperName);
+			return;
+		}
 
-			/*
-			if (!scraper) {
-				// log
-				continue;
+		if (!stationData) {
+			winston.info("New scraper found, initializing:", scraperName);
+			stationData = new ScrobblerStationData(scraperName);
+			this.stationData[scraperName] = stationData;
+		}
+
+		scraper.fetchAndParse((err, newSong) => {
+			if (err) {
+				winston.error("Error scraping " + scraperName + ": " + err);
+				if (this.lastUpdatedTooLongAgo(stationData, timestamp)) {
+					this.scrobbleNowPlayingIfValid(stationData, timestamp);
+					stationData.nowPlayingSong = UNKNOWN_SONG;
+					stationData.nowPlayingStarted = timestamp;
+					stationData.lastUpdatedTime = null;
+				}
+				return;
 			}
 
-			var stationData = this.stationData[scraperName];
-			if (!stationData) { 
-				stationData = {..};
-				this.stationData[scraperName] = stationData;
+			stationData.lastUpdatedTime = timestamp;
+
+			if (newSong != stationData.nowPlayingSong) {
+				this.scrobbleNowPlayingIfValid(stationData, timestamp);
+				stationData.nowPlayingSong = newSong;
+				stationData.nowPlayingStarted = timestamp;
 			}
+			this.postNowPlayingIfValid(stationData, timestamp);
+		});
+	}
 
-			(scraperName) => {
-				scraper.fetchAndParse((err, song) => {
-					// [Make sure errors only happen in rare & unexpected circumstances (e.g. 404 rather than song not found)
+	private lastUpdatedTooLongAgo(stationData:ScrobblerStationData, timestamp:number) {
+		return stationData.lastUpdatedTime && (stationData.lastUpdatedTime - timestamp < LAST_UPDATE_TIMEOUT);
+	}
 
-					if (err) {
-						continue
-						winston.error("Error scraping " + scraperName)
-					} 
-					// if station was last updated a long time ago, clear the data for the station
-					// update station last processed time to now
+	private scrobbleNowPlayingIfValid(stationData:ScrobblerStationData, timestamp:number) {
+		var songOk = stationData.nowPlayingSong && stationData.nowPlayingSong != UNKNOWN_SONG
+			&& stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track;
 
-					// if song is different to previous song
-						// scrobble previous song if it's valid and its start time was long enough ago
-						// update now playing song to current song and now playing start to now
-					// if the new now playing song is valid, post now playing
+		var playTimeOk = stationData.lastUpdatedTime
+			&& (stationData.lastUpdatedTime - stationData.nowPlayingStarted > MIN_SCROBBLE_TIME);
 
-					// [just need to store now playing song and when it started for each station]
+		var notJustScrobbled = stationData.nowPlayingSong != stationData.lastScrobbledSong;
 
-				});
-			}(scraperName);
-			*/
+		if (songOk && playTimeOk && notJustScrobbled) {
+			this.lastFmDao.scrobble(stationData.nowPlayingSong);
+			stationData.lastScrobbledSong = stationData.nowPlayingSong;
+		}
+	}
+
+	private postNowPlayingIfValid(stationData:ScrobblerStationData, timestamp:number) {
+		var songOk = stationData.nowPlayingSong && stationData.nowPlayingSong != UNKNOWN_SONG
+			&& stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track;
+
+		if (songOk) {
+			this.lastFmDao.postNowPlaying(stationData.nowPlayingSong);
 		}
 	}
 }
 
 /* 
-possible sequences
-null -> song1 -> null (should have posted now playing once but not scrobbled, song1 was not playing long enough)
-null -> song1 -> song1 -> null (should have posted now playing twice and scrobbled song1)
-song1 -> song1 -> song2 (should have posted now playing 3 times and scrobbled song1)
-song1 -> song2 -> song3 (should have posted now playing 3 times and not scrobbled)
-song1 -> error -> song1 -> null (should post now playing twice and scrobbled song1)
-song1 -> error -> song2 -> null (should post now playing twice and scrobbled song1)
-song1 -> error -> error -> error -> etc -> song1 -> null (should post now playing twice and not scrobbled)
-*/
+ possible sequences
+ null -> song1 -> null (should have posted now playing once but not scrobbled, song1 was not playing long enough)
+ null -> song1 -> song1 -> null (should have posted now playing twice and scrobbled song1)
+ song1 -> song1 -> song2 (should have posted now playing 3 times and scrobbled song1)
+ song1 -> song2 -> song3 (should have posted now playing 3 times and not scrobbled)
+ song1 -> error -> song1 -> null (should post now playing twice and scrobbled song1)
+ song1 -> error -> song2 -> null (should post now playing twice and scrobbled song1)
+ song1 -> error -> error -> error -> etc -> song1 -> null (should post now playing twice and not scrobbled)
+ */

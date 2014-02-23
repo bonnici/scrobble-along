@@ -59,11 +59,11 @@ export class KcqnScraper extends scrap.Scraper {
 		titleText = titleText.trim();
 
 		if (artistText && titleText) {
-			winston.info("C895Scraper found song " + artistText + " - " + titleText);
+			winston.info("KcqnScraper found song " + artistText + " - " + titleText);
 			return callback(null, { Artist: artistText, Track: titleText });
 		}
 		else {
-			winston.info("C895Scraper could not find song");
+			winston.info("KcqnScraper could not find song");
 			return callback(null, { Artist: null, Track: null });
 		}
 	}
