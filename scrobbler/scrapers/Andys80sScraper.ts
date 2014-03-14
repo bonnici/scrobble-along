@@ -11,8 +11,8 @@ export class Andys80sScraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.andys80s.com/playing.html";
 	}
 

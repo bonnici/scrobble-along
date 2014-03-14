@@ -8,8 +8,8 @@ import winston = require("winston");
 export class PunkFmScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://centovacast.galaxywebsolutions.com/external/rpc.php?m=streaminfo.get&username=punkfm&charset=&mountpoint=&rid=punkfm&_=";
 	}
 

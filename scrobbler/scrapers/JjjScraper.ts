@@ -10,8 +10,8 @@ import winston = require("winston");
 export class JjjScraper extends scrap.Scraper {
 	private baseUrl: string;
 
-	constructor(baseUrl?: string) {
-		super();
+	constructor(name:string, baseUrl?: string) {
+		super(name);
 		this.baseUrl = baseUrl || "http://www.abc.net.au/triplej/feeds/playout/triplej_sydney_playout.xml";
 	}
 

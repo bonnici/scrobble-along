@@ -20,8 +20,8 @@ export class NnmScraper extends scrap.Scraper {
 	private marciUrl: string;
 	public defaultStartTime: string = null; // Overridable for tests
 
-	constructor(marciUrl?: string, jsonUrl1?: string, jsonUrl2?: string) {
-		super();
+	constructor(name:string, marciUrl?: string, jsonUrl1?: string, jsonUrl2?: string) {
+		super(name);
 		this.marciUrl = marciUrl || "http://marci228.getmarci.com/";
 		this.jsonUrl1 = jsonUrl1 || "http://p1.radiocdn.com/player.php?hash=69d494aa557d8028daf3100b0538f48e48c53925&action=getCurrentData&_=%s";
 		this.jsonUrl2 = jsonUrl2 || "http://p2.radiocdn.com/player.php?hash=69d494aa557d8028daf3100b0538f48e48c53925&action=getCurrentData&_=%s";
@@ -32,7 +32,8 @@ export class NnmScraper extends scrap.Scraper {
 		this.tryParseMarci(this.marciUrl, (err, marciSong) => {
 			if (!err) {
 				winston.info("NnmScraper found song from Marci", marciSong);
-				return callback(null, marciSong);
+				callback(null, marciSong);
+				return
 			}
 
 			// Try each json URL if the marci URL fails
@@ -40,7 +41,8 @@ export class NnmScraper extends scrap.Scraper {
 			this.tryParseJson(fullUrl1, (err, jsonSong1) => {
 				if (!err) {
 					winston.info("NnmScraper found song from JSON URL 1", jsonSong1);
-					return callback(null, jsonSong1);
+					callback(null, jsonSong1);
+					return
 				}
 
 				var fullUrl2 = util.format(this.jsonUrl2, this.startTime());
@@ -50,7 +52,8 @@ export class NnmScraper extends scrap.Scraper {
 						return callback(null, jsonSong2);
 					}
 					winston.info("NnmScraper could not find song");
-					return callback(err, null);
+					callback(err, null);
+					return
 				});
 			});
 		});

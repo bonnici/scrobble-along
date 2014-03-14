@@ -18,7 +18,7 @@ describe("Scraper", () => {
 
 			nock(host).get(path).replyWithFile(200, __dirname + "/replies/kexp-sample.htm");
 
-			var scraper = new scrap.Scraper();
+			var scraper = new scrap.Scraper("name");
 			var done = false;
 
 			runs(() => {
@@ -38,7 +38,7 @@ describe("Scraper", () => {
 
 			nock(host).get(path).reply(404);
 
-			var scraper = new scrap.Scraper();
+			var scraper = new scrap.Scraper("name");
 			var done = false;
 
 			runs(() => {

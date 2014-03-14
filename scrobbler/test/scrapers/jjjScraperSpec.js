@@ -22,7 +22,7 @@ describe('JjjScraper', function () {
                 scope.reply(responseCode, response);
             }
 
-            var parser = new jjj.JjjScraper();
+            var parser = new jjj.JjjScraper("JJJ");
 
             return parser;
         };

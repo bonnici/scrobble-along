@@ -8,8 +8,8 @@ import winston = require("winston");
 export class KcrwEclectic24Scraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.kcrw.com/json_song";
 	}
 

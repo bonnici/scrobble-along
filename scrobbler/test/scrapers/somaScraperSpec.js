@@ -23,7 +23,7 @@ describe('SomaScraper', function () {
                 scope.reply(responseCode, response);
             }
 
-            var parser = new soma.SomaScraper(station);
+            var parser = new soma.SomaScraper("name", station);
 
             return parser;
         };

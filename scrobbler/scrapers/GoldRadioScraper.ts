@@ -10,8 +10,8 @@ import winston = require("winston");
 export class GoldRadioScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.mygoldmusic.co.uk/jsfiles/NowPlayingDisplay.aspx?f=http%3A%2F%2Frope%2Eicgo%2Efimc%2Enet%2FFeeds%2FNowPlaying%2FGCap%5FMedia%2FGold%5FNetwork%2FGold%5FLondon%2F5853%2Exml&l=5853&tzc=8";
 	}
 

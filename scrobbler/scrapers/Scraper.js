@@ -13,7 +13,8 @@ var winston = require("winston");
 
 // Abstract base class
 var Scraper = (function () {
-    function Scraper() {
+    function Scraper(name) {
+        this.name = name;
     }
     // Should call success with a song if it was found, success with null artist/track if no song was found,
     // failure if there was a recoverable error fetching or parsing
@@ -55,7 +56,7 @@ exports.Scraper = Scraper;
 var DummyScraper = (function (_super) {
     __extends(DummyScraper, _super);
     function DummyScraper(suffix) {
-        _super.call(this);
+        _super.call(this, "Dummy" + suffix);
         this.suffix = suffix;
     }
     DummyScraper.prototype.fetchAndParse = function (callback) {

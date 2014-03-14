@@ -8,8 +8,8 @@ import winston = require("winston");
 export class HollowEarthScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.boontdusties.com/specialhollow/yql.php";
 	}
 

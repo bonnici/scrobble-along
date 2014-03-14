@@ -11,8 +11,8 @@ export class KcrwScraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://newmedia.kcrw.com/tracklists/index.php?channel=Live";
 	}
 

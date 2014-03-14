@@ -10,8 +10,8 @@ import winston = require("winston");
 export class DigMusicScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor(baseUrl?: string) {
-		super();
+	constructor(name:string, baseUrl?: string) {
+		super(name);
 		this.url = baseUrl || "http://digmusic.net.au/player-data.php";
 	}
 

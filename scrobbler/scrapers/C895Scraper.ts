@@ -11,8 +11,8 @@ export class C895Scraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.c895.org/playlist/";
 	}
 

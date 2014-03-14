@@ -11,8 +11,8 @@ export class TheCurrentScraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.thecurrent.org/playlist";
 	}
 

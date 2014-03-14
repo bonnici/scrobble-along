@@ -7,12 +7,12 @@ import winston = require("winston");
 
 export class WfuvScraper extends scrap.Scraper {
 	private url: string;
-	private name: string;
+	private jsonName: string;
 
-	constructor(name: string) {
-		super();
+	constructor(name: string, jsonName:string) {
+		super(name);
 		this.url = "http://nowplaying.wfuv.org/playlistinfo2.php";
-		this.name = name;
+		this.jsonName = jsonName;
 	}
 
 	public fetchAndParse(callback: (err, song:song.Song) => void): void {
@@ -38,18 +38,18 @@ export class WfuvScraper extends scrap.Scraper {
 			return callback("Could not parse JSON body", null);
 		}
 
-		if (!json || !json[this.name]) {
+		if (!json || !json[this.jsonName]) {
 			winston.warn("WfuvScraper: Invalid JSON", json);
 			return callback(null, { Artist: null, Track: null });
 		}
 
-		if (!json[this.name].artist || !json[this.name].title) {
+		if (!json[this.jsonName].artist || !json[this.jsonName].title) {
 			winston.info("WfuvScraper could not find song");
 			return callback(null, { Artist: null, Track: null });
 		}
 
-		var artist = json[this.name].artist.trim();
-		var title = json[this.name].title.trim();
+		var artist = json[this.jsonName].artist.trim();
+		var title = json[this.jsonName].title.trim();
 
 		if (!artist || !title) {
 			winston.info("WfuvScraper could not find song");

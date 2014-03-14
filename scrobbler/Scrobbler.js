@@ -1,20 +1,21 @@
+/// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
+/// <reference path="../definitions/DefinitelyTyped/underscore/underscore.d.ts"/>
 
 
 
 
 
-//import _ = require("underscore");
+
+var _ = require("underscore");
 var winston = require("winston");
 
 // Constants
-var UNKNOWN_SONG = { Artist: null, Track: null };
 var LAST_UPDATE_TIMEOUT = 60 * 1000;
 var MIN_SCROBBLE_TIME = 35 * 1000;
 
 var ScrobblerStationData = (function () {
     function ScrobblerStationData(scraperName) {
-        this.scraperName = scraperName, this.nowPlayingSong = UNKNOWN_SONG;
-        this.nowPlayingStarted = null;
+        this.scraperName = scraperName, this.nowPlayingSong = { Artist: null, Track: null };
         this.lastScrobbledSong = null;
         this.lastUpdatedTime = null;
     }
@@ -23,29 +24,27 @@ var ScrobblerStationData = (function () {
 ;
 
 var Scrobbler = (function () {
-    function Scrobbler(scrapers, lastFmDao) {
-        this.scrapers = scrapers;
+    function Scrobbler(lastFmDao) {
         this.lastFmDao = lastFmDao;
         this.stationData = {};
     }
-    Scrobbler.prototype.scrapeAndScrobble = function (stations, timestamp) {
+    Scrobbler.prototype.scrapeAndScrobble = function (scraper, station, users, timestamp) {
+        var _this = this;
         timestamp = timestamp || new Date().getTime();
 
-        for (var i = 0; i < stations.length; i++) {
-            var scraperName = stations[i].ScraperName;
-            this.processScraper(scraperName, timestamp);
-        }
-    };
-
-    Scrobbler.prototype.processScraper = function (scraperName, timestamp) {
-        var _this = this;
-        var scraper = this.scrapers[scraperName];
-        var stationData = this.stationData[scraperName];
-
         if (!scraper) {
-            winston.error("Attempted to process invalid scraper:", scraperName);
+            winston.error("Attempted to process invalid scraper:", scraper);
             return;
         }
+
+        var scraperName = scraper.name;
+
+        if (!station.Session) {
+            winston.error("Attempted to process station with invalid station session:", station);
+            return;
+        }
+
+        var stationData = this.stationData[scraperName];
 
         if (!stationData) {
             winston.info("New scraper found, initializing:", scraperName);
@@ -57,9 +56,8 @@ var Scrobbler = (function () {
             if (err) {
                 winston.error("Error scraping " + scraperName + ": " + err);
                 if (_this.lastUpdatedTooLongAgo(stationData, timestamp)) {
-                    _this.scrobbleNowPlayingIfValid(stationData, timestamp);
-                    stationData.nowPlayingSong = UNKNOWN_SONG;
-                    stationData.nowPlayingStarted = timestamp;
+                    _this.scrobbleNowPlayingIfValid(stationData, station, users);
+                    stationData.nowPlayingSong = { Artist: null, Track: null, StartTime: timestamp };
                     stationData.lastUpdatedTime = null;
                 }
                 return;
@@ -68,11 +66,10 @@ var Scrobbler = (function () {
             stationData.lastUpdatedTime = timestamp;
 
             if (!newSong || !stationData.nowPlayingSong || newSong.Artist != stationData.nowPlayingSong.Artist || newSong.Track != stationData.nowPlayingSong.Track) {
-                _this.scrobbleNowPlayingIfValid(stationData, timestamp);
-                stationData.nowPlayingSong = newSong;
-                stationData.nowPlayingStarted = timestamp;
+                _this.scrobbleNowPlayingIfValid(stationData, station, users);
+                stationData.nowPlayingSong = { Artist: newSong.Artist, Track: newSong.Track, StartTime: timestamp };
             }
-            _this.postNowPlayingIfValid(stationData, timestamp);
+            _this.postNowPlayingIfValid(stationData, station, users);
         });
     };
 
@@ -80,25 +77,42 @@ var Scrobbler = (function () {
         return stationData.lastUpdatedTime && (stationData.lastUpdatedTime - timestamp < LAST_UPDATE_TIMEOUT);
     };
 
-    Scrobbler.prototype.scrobbleNowPlayingIfValid = function (stationData, timestamp) {
-        var songOk = stationData.nowPlayingSong && stationData.nowPlayingSong != UNKNOWN_SONG && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track;
-
-        var playTimeOk = stationData.lastUpdatedTime && (stationData.lastUpdatedTime - stationData.nowPlayingStarted > MIN_SCROBBLE_TIME);
-
-        var notJustScrobbled = stationData.nowPlayingSong != stationData.lastScrobbledSong;
-
-        if (songOk && playTimeOk && notJustScrobbled) {
-            this.lastFmDao.scrobble(stationData.nowPlayingSong);
-            stationData.lastScrobbledSong = stationData.nowPlayingSong;
+    Scrobbler.prototype.scrobbleNowPlayingIfValid = function (stationData, station, users) {
+        var _this = this;
+        if (!(stationData.nowPlayingSong && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track && stationData.nowPlayingSong.StartTime)) {
+            return;
         }
+
+        if (!(stationData.lastUpdatedTime && (stationData.lastUpdatedTime - stationData.nowPlayingSong.StartTime > MIN_SCROBBLE_TIME))) {
+            return;
+        }
+
+        if (stationData.nowPlayingSong != null && stationData.lastScrobbledSong != null && stationData.nowPlayingSong.Artist == stationData.lastScrobbledSong.Artist && stationData.nowPlayingSong.Track == stationData.lastScrobbledSong.Track) {
+            return;
+        }
+
+        stationData.lastScrobbledSong = stationData.nowPlayingSong;
+
+        this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
+
+        //todo serialize? check that this works IRL
+        _.each(users, function (user) {
+            _this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+        });
     };
 
-    Scrobbler.prototype.postNowPlayingIfValid = function (stationData, timestamp) {
-        var songOk = stationData.nowPlayingSong && stationData.nowPlayingSong != UNKNOWN_SONG && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track;
-
-        if (songOk) {
-            this.lastFmDao.postNowPlaying(stationData.nowPlayingSong);
+    Scrobbler.prototype.postNowPlayingIfValid = function (stationData, station, users) {
+        var _this = this;
+        if (!(stationData.nowPlayingSong && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track)) {
+            return;
         }
+
+        this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
+
+        //todo serialize? check that this works IRL
+        _.each(users, function (user) {
+            _this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
+        });
     };
     return Scrobbler;
 })();

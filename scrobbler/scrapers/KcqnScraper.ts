@@ -10,8 +10,8 @@ import winston = require("winston");
 export class KcqnScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.kcqnutah.com/tmp/testFile.txt";
 	}
 

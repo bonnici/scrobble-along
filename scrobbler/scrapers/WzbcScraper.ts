@@ -11,8 +11,8 @@ export class WzbcScraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://spinitron.com/public/index.php?station=wzbc";
 	}
 

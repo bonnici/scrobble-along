@@ -29,7 +29,7 @@ describe('KexpScraper', () => {
 				scope.reply(responseCode, response);
 			}
 
-			var parser = new kexp.KexpScraper(host + path);
+			var parser = new kexp.KexpScraper("name", host + path);
 			parser.defaultStartTime = dateString;
 
 			return parser;

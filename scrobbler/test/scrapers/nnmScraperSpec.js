@@ -8,7 +8,7 @@ var nock = require("nock");
 
 var nnm = require("../../scrapers/NnmScraper");
 
-describe('KexpScraper', function () {
+describe('NnmScraper', function () {
     describe("fetchAndParse", function () {
         var setupTest = function (marciResponseCode, marciResponse, isMarciFile, jsonResponseCode1, jsonResponse1, jsonResponseCode2, jsonResponse2) {
             var unixTime = moment().unix().toString();
@@ -30,7 +30,7 @@ describe('KexpScraper', function () {
 
             var jsonScope2 = nock(host2).get(formattedPath).reply(jsonResponseCode2, jsonResponse2);
 
-            var parser = new nnm.NnmScraper(marciHost + "/", host1 + path, host2 + path);
+            var parser = new nnm.NnmScraper("name", marciHost + "/", host1 + path, host2 + path);
             parser.defaultStartTime = unixTime;
 
             return parser;
@@ -306,7 +306,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -316,7 +318,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -326,7 +330,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -336,7 +342,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -346,7 +354,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -356,7 +366,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -366,7 +378,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -376,7 +390,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
 
             runs(function () {
                 done = false;
@@ -386,7 +402,9 @@ describe('KexpScraper', function () {
                     done = true;
                 });
             });
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
         });
 
         it('should return an error on a json 404', function () {
@@ -401,7 +419,9 @@ describe('KexpScraper', function () {
                 });
             });
 
-            waitsFor(function () { return done; }, "Timeout", 5000);
+            waitsFor(function () {
+                return done;
+            }, "Timeout", 5000);
         });
     });
 });

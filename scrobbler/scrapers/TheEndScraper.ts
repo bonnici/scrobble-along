@@ -8,8 +8,8 @@ import winston = require("winston");
 export class TheEndScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://kndd.tunegenie.com/w2/pluginhour/since/kndd/";
 	}
 

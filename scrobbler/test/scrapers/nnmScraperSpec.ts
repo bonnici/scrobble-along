@@ -9,7 +9,7 @@ import nock = require("nock");
 
 import nnm = require("../../scrapers/NnmScraper");
 
-describe('KexpScraper', () => {
+describe('NnmScraper', () => {
 
 	describe("fetchAndParse", () => {
 
@@ -42,7 +42,7 @@ describe('KexpScraper', () => {
 				.get(formattedPath)
 				.reply(jsonResponseCode2, jsonResponse2);
 
-			var parser = new nnm.NnmScraper(marciHost + "/", host1 + path, host2 + path);
+			var parser = new nnm.NnmScraper("name", marciHost + "/", host1 + path, host2 + path);
 			parser.defaultStartTime = unixTime;
 
 			return parser;
@@ -290,8 +290,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"nnm","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -300,8 +300,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"discojingles","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -310,8 +310,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"connection timed out","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -320,8 +320,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"TuneIn","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -330,8 +330,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"Beer Magazine","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -340,8 +340,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"CC WIFI RADIO","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -350,8 +350,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"something new normal music something","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
@@ -360,8 +360,8 @@ describe('KexpScraper', () => {
 			});
 			waitsFor(() => { return done; }, "Timeout", 5000);
 
-			done = false;
 			runs(() => {
+				done = false;
 				setupTest(404, '', false, 404, "", 200, '{"artist":"818.52.radio fm","track":"Beta Love"}').fetchAndParse((err, song) => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });

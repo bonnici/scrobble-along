@@ -17,8 +17,8 @@ var winston = require("winston");
 
 var KexpScraper = (function (_super) {
     __extends(KexpScraper, _super);
-    function KexpScraper(baseUrl) {
-        _super.call(this);
+    function KexpScraper(name, baseUrl) {
+        _super.call(this, name);
         this.defaultStartTime = null;
         this.baseUrl = baseUrl || "http://kexp.org/playlist/playlistupdates?channel=1&start=%s&since=%s";
     }

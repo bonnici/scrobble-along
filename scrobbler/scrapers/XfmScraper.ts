@@ -27,8 +27,8 @@ export class XfmScraper extends scrap.Scraper {
 	 */
 
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://www.xfm.co.uk/london/";
 	}
 

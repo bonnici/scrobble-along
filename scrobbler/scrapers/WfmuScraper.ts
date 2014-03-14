@@ -11,8 +11,8 @@ export class WfmuScraper extends scrap.Scraper {
 
 	private url: string;
 
-	constructor() {
-		super();
+	constructor(name:string) {
+		super(name);
 		this.url = "http://wfmu.org/currentliveshows_aggregator.php?ch=1";
 	}
 

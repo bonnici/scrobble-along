@@ -9,6 +9,8 @@ import winston = require("winston");
 // Abstract base class
 export class Scraper {
 
+	constructor(public name:string) {}
+
 	// Should call success with a song if it was found, success with null artist/track if no song was found,
 	// failure if there was a recoverable error fetching or parsing
 	public fetchAndParse(callback: (err, song: song.Song) => void): void {
@@ -48,7 +50,7 @@ export class Scraper {
 
 export class DummyScraper extends Scraper {
 	constructor(public suffix: string) {
-		super();
+		super("Dummy" + suffix);
 	}
 
 	public fetchAndParse(callback: (err, song: song.Song) => void): void {

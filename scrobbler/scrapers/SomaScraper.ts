@@ -10,8 +10,8 @@ import winston = require("winston");
 export class SomaScraper extends scrap.Scraper {
 	private url: string;
 
-	constructor(station: string) {
-		super();
+	constructor(name:string, station: string) {
+		super(name);
 		this.url = "http://somafm.com/" + station + "/songhistory.html";
 	}
 

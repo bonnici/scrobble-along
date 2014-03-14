@@ -14,8 +14,8 @@ export class KexpScraper extends scrap.Scraper {
 	public defaultStartTime: string = null; // Overridable for tests
 	private baseUrl: string;
 
-	constructor(baseUrl?: string) {
-		super();
+	constructor(name:string, baseUrl?: string) {
+		super(name);
 		this.baseUrl = baseUrl || "http://kexp.org/playlist/playlistupdates?channel=1&start=%s&since=%s";
 	}
 
