@@ -111,7 +111,6 @@ export class Scrobbler {
 
 		this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
 
-		//todo serialize? check that this works IRL
 		_.each(users, (user) => {
 			this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
 		});
@@ -125,7 +124,6 @@ export class Scrobbler {
 
 		this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
 
-		//todo serialize? check that this works IRL
 		_.each(users, (user) => {
 			this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
 		});

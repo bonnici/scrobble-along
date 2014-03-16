@@ -46,7 +46,6 @@ export class MongoUserDao implements UserDao {
 				return;
 			}
 
-			//todo test the find
 			collection.find({ listening: station }).toArray((err, results) => { 
 				if (err) {
 					callback(error, null);
@@ -59,7 +58,10 @@ export class MongoUserDao implements UserDao {
 						winston.error("Invalid user record found in DB:", record);
 					}
 					else {
-						var user = { UserName: record._id, Session: this.crypter.decrypt(record.session) };
+						var user = {
+							UserName: record._id,
+							Session: record.session ? this.crypter.decrypt(record.session) : null
+						};
 						winston.info("Found user listening to " + station + ":", user.UserName);
 						users.push(user);
 					}

@@ -58,10 +58,9 @@ var LastFmDaoImpl = (function () {
             duration: this.POST_NOW_PLAYING_DURATION,
             handlers: {
                 success: function (data) {
-                    winston.info("Success posting now playing for " + lastFmUsername);
+                    winston.info("Success posting now playing for " + lastFmUsername, song);
                     callback(null, "OK");
                 },
-                //todo retrying?
                 error: function (error) {
                     winston.error("Error posting now playing for " + lastFmUsername, error.message);
                     callback(error, null);
@@ -77,16 +76,21 @@ var LastFmDaoImpl = (function () {
         callback = callback || (function () {
         });
 
+        if (!song || !song.Artist || !song.Track || !lastFmUsername || !sessionKey) {
+            winston.error("scrobble invalid parameters:", { song: song, lastFmUsername: lastFmUsername, sessionKey: sessionKey });
+            callback("Invalid parameters", null);
+            return;
+        }
+
         var updateOptions = {
             artist: song.Artist,
             track: song.Track,
             timestamp: Math.round(song.StartTime / 1000),
             handlers: {
                 success: function (data) {
-                    winston.info("Success posting scrobble for " + lastFmUsername);
+                    winston.info("Success posting scrobble for " + lastFmUsername, song);
                     callback(null, "OK");
                 },
-                //todo retrying?
                 error: function (error) {
                     winston.error("Error posting scrobble for " + lastFmUsername, error.message);
                     callback(error, null);

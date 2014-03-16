@@ -3,6 +3,17 @@
 /// <reference path="../definitions/dummy-definitions/lastfm.d.ts"/>
 /// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
 
+/*
+Transition plan:
+* Fix last.fm scraper
+* Turn off scrobbling on the appfog app & permenantly enable this scrobbler
+  * Remove all sessions
+  * Update all None scrapers to last.fm scraper
+  * Push to github and get on server
+* Do front-end stuff & send to appfog
+* Work out how to run front-end stuff on server
+*/
+
 import _ = require("underscore");
 import lastfm = require("lastfm");
 import mongodb = require("mongodb");
@@ -39,13 +50,15 @@ import playFm = require("./scrapers/PlayFmScraper");
 import theCurrent = require("./scrapers/TheCurrentScraper");
 
 // Required environment variables
-var CRYPTO_KEY = process.env.CRYPTO_KEY;
+var STATION_CRYPTO_KEY = process.env.STATION_CRYPTO_KEY;
+var USER_CRYPTO_KEY = process.env.USER_CRYPTO_KEY;
 var MONGO_URI = process.env.MONGO_URI;
 var LASTFM_API_KEY = process.env.LASTFM_API_KEY;
 var LASTFM_SECRET = process.env.LASTFM_SECRET;
+var SHOULD_SCROBBLE = process.env.SHOULD_SCROBBLE;
 
-if (!CRYPTO_KEY || !MONGO_URI || !LASTFM_API_KEY || !LASTFM_SECRET) {
-	winston.err("A required environment variable is missing:", process.env);
+if (!STATION_CRYPTO_KEY || !USER_CRYPTO_KEY || !MONGO_URI || !LASTFM_API_KEY || !LASTFM_SECRET || !SHOULD_SCROBBLE) {
+	winston.error("A required environment variable is missing:", process.env);
 	process.exit(1);
 }
 
@@ -87,10 +100,27 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
 	secret: LASTFM_SECRET,
-	useragent: 'todo: get from DB'
+	useragent: 'scrobblealong/v0.0.1 ScrobbleAlong'
 });
-var lastFmDao = new lfmDao.LastFmDaoImpl(lastfmNode);
+
+var lastFmDao = SHOULD_SCROBBLE == "true" ? new lfmDao.LastFmDaoImpl(lastfmNode) : new lfmDao.DummyLastFmDao();
+
 var scrobbler = new scrob.Scrobbler(lastFmDao);
+
+function scrapeAndScrobbleAllStations(stationDao, userDao) {
+	stationDao.getStations((err, stations: stat.Station[]) => {
+		if (err) return; // Assume error logging is done by DAO
+
+		_.each(stations, (station:stat.Station) => {
+			if (!station) return; // break
+
+			userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
+				if (err) return; // break
+				scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
+			});
+		});
+	});
+};
 
 mongodb.connect(MONGO_URI, (err, dbClient) => {
 	if (err) {
@@ -98,26 +128,11 @@ mongodb.connect(MONGO_URI, (err, dbClient) => {
 		process.exit(1);
 	}
 
-	var crypter = new crypt.CrypterImpl(CRYPTO_KEY);
-	var stationDao = new statDao.MongoStationDao(dbClient, crypter);
-	var userDao = new usrDao.MongoUserDao(dbClient, crypter);
+	var stationDao = new statDao.MongoStationDao(dbClient, new crypt.CrypterImpl(STATION_CRYPTO_KEY));
+	var userDao = new usrDao.MongoUserDao(dbClient, new crypt.CrypterImpl(USER_CRYPTO_KEY));
 
-	setInterval(
-		() => {
-			stationDao.getStations((err, stations: stat.Station[]) => {
-				if (err) return; // Assume error logging is done by DAO
-
-				_.each(stations, (station:stat.Station) => {
-					if (!station) return; // break //todo test that this actually does break
-
-					userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
-						if (err) return; // break //todo test that this actually does break
-						scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
-					});
-				});
-			});
-		}
-	, interval);
+	setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
+	scrapeAndScrobbleAllStations(stationDao, userDao);
 });
 
 
@@ -136,10 +151,10 @@ setInterval(
 			if (err) return; // Assume error logging is done by DAO
 
 			_.each(stations, (station:stat.Station) => {
-				if (!station) return; // break //todo test that this actually does break
+				if (!station) return; // break
 
 				userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
-					if (err) return; // break //todo test that this actually does break
+					if (err) return; // break
 					scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
 				});
 			});
