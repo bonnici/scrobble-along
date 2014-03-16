@@ -9,7 +9,7 @@ var __extends = this.__extends || function (d, b) {
 var scrap = require("./Scraper");
 
 
-var cheerio = require("cheerio");
+
 var winston = require("winston");
 
 var InfinitaScraper = (function (_super) {
@@ -34,10 +34,18 @@ var InfinitaScraper = (function (_super) {
             return;
         }
 
-        var $ = cheerio.load(body);
+        // Cheerio not working, use regex
+        var artistPattern = /<interprete><!\[CDATA\[(.*?)]]><\/interprete>/;
+        var artistMatches = artistPattern.exec(body);
+        var titlePattern = /<nombre><!\[CDATA\[(.*?)]]><\/nombre>/;
+        var titleMatches = titlePattern.exec(body);
 
-        var artistData = $('interprete').text();
-        var songData = $('nombre').text();
+        if (!artistMatches || artistMatches.length == 0 || !titleMatches || titleMatches.length == 0) {
+            callback(null, { Artist: null, Track: null });
+            return;
+        }
+        var artistData = artistMatches[1];
+        var songData = titleMatches[1];
 
         if (!artistData || !songData) {
             callback(null, { Artist: null, Track: null });
