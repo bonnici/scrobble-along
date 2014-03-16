@@ -4,27 +4,28 @@
 /// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
 /*
 Transition plan:
-* Fix last.fm scraper
 * Turn off scrobbling on the appfog app & permenantly enable this scrobbler
 * Remove all sessions
 * Update all None scrapers to last.fm scraper
+* Add parameters for scrapers in DB
 * Push to github and get on server
 * Do front-end stuff & send to appfog
+* Add option to clear all listening & clear sessions
 * Work out how to run front-end stuff on server
 */
 var _ = require("underscore");
-
-
+var lastfm = require("lastfm");
+var mongodb = require("mongodb");
 var winston = require("winston");
 
-
+var crypt = require("./Crypter");
 
 var scrob = require("./Scrobbler");
 
-
+var statDao = require("./StationDao");
 var lfmDao = require("./LastFmDao");
 
-
+var usrDao = require("./UserDao");
 
 var kexp = require("./scrapers/KexpScraper");
 var nnm = require("./scrapers/NnmScraper");
@@ -47,6 +48,11 @@ var wzbc = require("./scrapers/WzbcScraper");
 var playFm = require("./scrapers/PlayFmScraper");
 var theCurrent = require("./scrapers/TheCurrentScraper");
 var lfmScraper = require("./scrapers/LastfmScraper");
+var infinita = require("./scrapers/InfinitaScraper");
+var mediaStream = require("./scrapers/MediaStreamScraper");
+var newtown = require("./scrapers/NewtownRadioScraper");
+var radio2Nl = require("./scrapers/Radio2NLScraper");
+var kloveAir1 = require("./scrapers/KLoveAir1Scraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.STATION_CRYPTO_KEY;
@@ -110,17 +116,23 @@ var scrapers = {
     Absolute00s: new lfmScraper.LastfmScraper("Absolute00s", "absoluterad00s", LASTFM_API_KEY, true),
     AbsoluteClassic: new lfmScraper.LastfmScraper("AbsoluteClassic", "absoluteclassic", LASTFM_API_KEY, true),
     MutantRadio: new lfmScraper.LastfmScraper("MutantRadio", "mutant_radio", LASTFM_API_KEY),
-    StuBruRadio: new lfmScraper.LastfmScraper("StuBruRadio", "stubruradio", LASTFM_API_KEY, true)
+    StuBruRadio: new lfmScraper.LastfmScraper("StuBruRadio", "stubruradio", LASTFM_API_KEY, true),
+    Infinita: new infinita.InfinitaScraper("Infinita"),
+    Oasis: new mediaStream.MediaStreamScraper("Oasis", "5124ed51ed596bde7d000016"),
+    Horizonte: new mediaStream.MediaStreamScraper("Horizonte", "5124f1b4ed596bde7d000017"),
+    NewtownRadio: new newtown.NewtownRadioScraper("NewtownRadio"),
+    Radio2NL: new radio2Nl.Radio2NLScraper("Radio2NL"),
+    Air1: new kloveAir1.KLoveAir1RadioScraper("Air1", "2"),
+    KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1")
 };
 
 //////////////
 // Proper scrobbler
 //////////////
-/*
 var lastfmNode = new lastfm.LastFmNode({
-api_key: LASTFM_API_KEY,
-secret: LASTFM_SECRET,
-useragent: 'scrobblealong/v0.0.1 ScrobbleAlong'
+    api_key: LASTFM_API_KEY,
+    secret: LASTFM_SECRET,
+    useragent: 'scrobblealong/v0.0.1 ScrobbleAlong'
 });
 
 var lastFmDao = SHOULD_SCROBBLE == "true" ? new lfmDao.LastFmDaoImpl(lastfmNode) : new lfmDao.DummyLastFmDao();
@@ -128,139 +140,37 @@ var lastFmDao = SHOULD_SCROBBLE == "true" ? new lfmDao.LastFmDaoImpl(lastfmNode)
 var scrobbler = new scrob.Scrobbler(lastFmDao);
 
 function scrapeAndScrobbleAllStations(stationDao, userDao) {
-stationDao.getStations((err, stations: stat.Station[]) => {
-if (err) return; // Assume error logging is done by DAO
+    stationDao.getStations(function (err, stations) {
+        if (err)
+            return;
 
-_.each(stations, (station:stat.Station) => {
-if (!station) return; // break
+        _.each(stations, function (station) {
+            if (!station)
+                return;
 
-userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
-if (err) return; // break
-scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
-});
-});
-});
-};
-
-mongodb.connect(MONGO_URI, (err, dbClient) => {
-if (err) {
-winston.err("Error connecting to MongoDB:", err);
-process.exit(1);
-}
-
-var stationDao = new statDao.MongoStationDao(dbClient, new crypt.CrypterImpl(STATION_CRYPTO_KEY));
-var userDao = new usrDao.MongoUserDao(dbClient, new crypt.CrypterImpl(USER_CRYPTO_KEY));
-
-setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
-scrapeAndScrobbleAllStations(stationDao, userDao);
-});
-*/
-//////////////
-// Scrobbler that scrapes but does not scrobble or load proper users/stations
-//////////////
-/*
-var stationDao = new statDao.DummyStationDao();
-var userDao = new usrDao.DummyUserDao();
-var lastFmDao = new lfmDao.DummyLastFmDao();
-var scrobbler = new scrob.Scrobbler(lastFmDao);
-
-setInterval(
-() => {
-stationDao.getStations((err, stations: stat.Station[]) => {
-if (err) return; // Assume error logging is done by DAO
-
-_.each(stations, (station:stat.Station) => {
-if (!station) return; // break
-
-userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
-if (err) return; // break
-scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
-});
-});
-});
-}
-, interval);
-*/
-//////////////
-// Scrobbler that scrapes but does not scrobble and uses fake stations & users
-//////////////
-var stations = [
-    { StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
-    { StationName: "NNM", ScraperName: "NNM", Session: "NNMSession" },
-    { StationName: "triplejradio", ScraperName: "JJJ", Session: "triplejradioSession" },
-    { StationName: "Unearthed", ScraperName: "Unearthed", Session: "UnearthedSession" },
-    { StationName: "SomaIndiePop", ScraperName: "SomaIndiePop", Session: "SomaIndiePopSession" },
-    { StationName: "SomaLush", ScraperName: "SomaLush", Session: "SomaLushSession" },
-    { StationName: "SomaUnderground80s", ScraperName: "SomaUnderground80s", Session: "SomaUnderground80sSession" },
-    { StationName: "HollowEarth", ScraperName: "HollowEarth", Session: "HollowEarthSession" },
-    { StationName: "TheEnd", ScraperName: "TheEnd", Session: "TheEndSession" },
-    { StationName: "C895", ScraperName: "C895", Session: "C895Session" },
-    { StationName: "KCRWEclectic24", ScraperName: "KCRWEclectic24", Session: "KCRWEclectic24Session" },
-    { StationName: "KCQN", ScraperName: "KCQN", Session: "KCQNSession" },
-    { StationName: "Gold", ScraperName: "Gold", Session: "GoldSession" },
-    { StationName: "WFMU", ScraperName: "WFMU", Session: "WFMUSession" },
-    { StationName: "KCRW", ScraperName: "KCRW", Session: "KCRWSession" },
-    { StationName: "XFM", ScraperName: "XFM", Session: "XFMSession" },
-    { StationName: "PunkFM", ScraperName: "PunkFM", Session: "PunkFMSession" },
-    { StationName: "Andys80s", ScraperName: "Andys80s", Session: "Andys80sSession" },
-    { StationName: "WFUV", ScraperName: "WFUV", Session: "WFUVSession" },
-    { StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "FUVAllMusicSession" },
-    { StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "AlternateSideSession" },
-    { StationName: "DigMusic", ScraperName: "DigMusic", Session: "DigMusicSession" },
-    { StationName: "WZBC", ScraperName: "WZBC", Session: "WZBCSession" },
-    { StationName: "PlayFM", ScraperName: "PlayFM", Session: "PlayFMSession" },
-    { StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "ABCJazzSession" },
-    { StationName: "TheCurrent", ScraperName: "TheCurrent", Session: "TheCurrentSession" },
-    { StationName: "SomaBagel", ScraperName: "SomaBagel", Session: "SomaBagelSession" },
-    { StationName: "SomaIllStreet", ScraperName: "SomaIllStreet", Session: "SomaIllStreetSession" },
-    { StationName: "SomaDroneZone", ScraperName: "SomaDroneZone", Session: "SomaDroneZoneSession" },
-    { StationName: "SomaSpaceStation", ScraperName: "SomaSpaceStation", Session: "SomaSpaceStationSession" },
-    { StationName: "SomaSecretAgent", ScraperName: "SomaSecretAgent", Session: "SomaSecretAgentSession" },
-    { StationName: "SomaGrooveSalad", ScraperName: "SomaGrooveSalad", Session: "SomaGrooveSaladSession" },
-    { StationName: "SomaSonicUniverse", ScraperName: "SomaSonicUniverse", Session: "SomaSonicUniverseSession" },
-    { StationName: "SomaDigitalis", ScraperName: "SomaDigitalis", Session: "SomaDigitalisSession" },
-    { StationName: "BBCRadio1", ScraperName: "BBCRadio1", Session: "BBCRadio1Session" },
-    { StationName: "BBC1Xtra", ScraperName: "BBC1Xtra", Session: "BBC1XtraSession" },
-    { StationName: "BBCRadio2", ScraperName: "BBCRadio2", Session: "BBCRadio2Session" },
-    { StationName: "BBC6", ScraperName: "BBC6", Session: "BBC6Session" },
-    { StationName: "SeriousRadio", ScraperName: "SeriousRadio", Session: "SeriousRadioSession" },
-    { StationName: "Absolute80s", ScraperName: "Absolute80s", Session: "Absolute80sSession" },
-    { StationName: "AbsoluteRadio", ScraperName: "AbsoluteRadio", Session: "AbsoluteRadioSession" },
-    { StationName: "Absolute60s", ScraperName: "Absolute60s", Session: "Absolute60sSession" },
-    { StationName: "Absolute70s", ScraperName: "Absolute70s", Session: "Absolute70sSession" },
-    { StationName: "Absolute90s", ScraperName: "Absolute90s", Session: "Absolute90sSession" },
-    { StationName: "Absolute00s", ScraperName: "Absolute00s", Session: "Absolute00sSession" },
-    { StationName: "AbsoluteClassic", ScraperName: "AbsoluteClassic", Session: "AbsoluteClassicSession" },
-    { StationName: "MutantRadio", ScraperName: "MutantRadio", Session: "MutantRadioSession" },
-    { StationName: "StuBruRadio", ScraperName: "StuBruRadio", Session: "StuBruRadioSession" }
-];
-
-var usersListening = {
-    KEXP903FM: [
-        { UserName: "KEXPListener1", Session: "KEXPListener1Session" },
-        { UserName: "KEXPListener2", Session: "KEXPListener2Session" }
-    ],
-    NNM: [{ UserName: "KEXPListener1", Session: "KEXPListener1Session" }],
-    triplejradio: [{ UserName: "JJJListener1", Session: "JJJListener1Session" }, null],
-    TheEnd: null,
-    TheCurrent: []
-};
-
-var lastFmDao = new lfmDao.DummyLastFmDao();
-var scrobbler = new scrob.Scrobbler(lastFmDao);
-
-setInterval(function () {
-    testScrapeAndScrobble();
-}, interval);
-testScrapeAndScrobble();
-
-function testScrapeAndScrobble() {
-    _.each(stations, function (station) {
-        if (station) {
-            scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, usersListening[station.StationName]);
-        }
+            userDao.getUsersListeningToStation(station.StationName, function (err, users) {
+                if (err)
+                    return;
+                scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
+            });
+        });
     });
 }
 ;
+
+mongodb.connect(MONGO_URI, function (err, dbClient) {
+    if (err) {
+        winston.err("Error connecting to MongoDB:", err);
+        process.exit(1);
+    }
+
+    var stationDao = new statDao.MongoStationDao(dbClient, new crypt.CrypterImpl(STATION_CRYPTO_KEY));
+    var userDao = new usrDao.MongoUserDao(dbClient, new crypt.CrypterImpl(USER_CRYPTO_KEY));
+
+    setInterval(function () {
+        scrapeAndScrobbleAllStations(stationDao, userDao);
+    }, interval);
+    scrapeAndScrobbleAllStations(stationDao, userDao);
+});
 
 //# sourceMappingURL=main.js.map

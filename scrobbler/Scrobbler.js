@@ -33,16 +33,11 @@ var Scrobbler = (function () {
         timestamp = timestamp || new Date().getTime();
 
         if (!scraper) {
-            winston.error("Attempted to process invalid scraper:", scraper);
+            winston.error("Attempted to process invalid scraper:", { scraper: scraper, station: station });
             return;
         }
 
         var scraperName = scraper.name;
-
-        if (!station.Session) {
-            winston.error("Attempted to process station with invalid station session:", station);
-            return;
-        }
 
         var stationData = this.stationData[scraperName];
 
@@ -93,7 +88,9 @@ var Scrobbler = (function () {
 
         stationData.lastScrobbledSong = stationData.nowPlayingSong;
 
-        this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
+        if (station.Session) {
+            this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
+        }
 
         _.each(users, function (user) {
             if (user) {
@@ -108,7 +105,9 @@ var Scrobbler = (function () {
             return;
         }
 
-        this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
+        if (station.Session) {
+            this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
+        }
 
         _.each(users, function (user) {
             if (user) {

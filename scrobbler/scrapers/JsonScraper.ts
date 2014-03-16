@@ -36,8 +36,16 @@ export class JsonScraper extends scrap.Scraper {
 				return;
 			}
 
-			callback(null, this.extractSong(json));
-			return
+			try {
+				var curSong = this.extractSong(json);
+				callback(null, curSong);
+				return;
+			}
+			catch (err) {
+				winston.warn("JsonScraper: Invalid JSON", json);
+			}
+
+			callback(null, { Artist: null, Track: null });
 		});
 	}
 

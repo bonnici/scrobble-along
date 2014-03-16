@@ -8,7 +8,7 @@ var __extends = this.__extends || function (d, b) {
 
 var jsonScrap = require("./JsonScraper");
 
-var winston = require("winston");
+
 
 var LastfmScraper = (function (_super) {
     __extends(LastfmScraper, _super);
@@ -18,18 +18,14 @@ var LastfmScraper = (function (_super) {
         this.url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + username + "&api_key=" + apiKey + "&limit=1&format=json";
     }
     LastfmScraper.prototype.extractSong = function (jsonData) {
-        try  {
-            var track = jsonData['recenttracks']['track'];
+        var track = jsonData['recenttracks']['track'];
 
-            if (!track["artist"]) {
-                track = track[0];
-            }
+        if (!track["artist"]) {
+            track = track[0];
+        }
 
-            if (this.ignoreListening || track["@attr"] && track["@attr"]["nowplaying"] == "true") {
-                return { Artist: track['artist']['#text'], Track: track['name'] };
-            }
-        } catch (err) {
-            winston.warn("LastfmScraper: Invalid JSON", jsonData);
+        if (this.ignoreListening || track["@attr"] && track["@attr"]["nowplaying"] == "true") {
+            return { Artist: track['artist']['#text'], Track: track['name'] };
         }
 
         return { Artist: null, Track: null };

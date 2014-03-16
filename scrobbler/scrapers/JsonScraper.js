@@ -39,8 +39,15 @@ var JsonScraper = (function (_super) {
                 return;
             }
 
-            callback(null, _this.extractSong(json));
-            return;
+            try  {
+                var curSong = _this.extractSong(json);
+                callback(null, curSong);
+                return;
+            } catch (err) {
+                winston.warn("JsonScraper: Invalid JSON", json);
+            }
+
+            callback(null, { Artist: null, Track: null });
         });
     };
 

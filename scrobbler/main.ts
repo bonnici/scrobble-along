@@ -5,12 +5,13 @@
 
 /*
 Transition plan:
-* Fix last.fm scraper
 * Turn off scrobbling on the appfog app & permenantly enable this scrobbler
   * Remove all sessions
   * Update all None scrapers to last.fm scraper
+  * Add parameters for scrapers in DB
   * Push to github and get on server
 * Do front-end stuff & send to appfog
+  * Add option to clear all listening & clear sessions
 * Work out how to run front-end stuff on server
 */
 
@@ -49,6 +50,11 @@ import wzbc = require("./scrapers/WzbcScraper");
 import playFm = require("./scrapers/PlayFmScraper");
 import theCurrent = require("./scrapers/TheCurrentScraper");
 import lfmScraper = require("./scrapers/LastfmScraper");
+import infinita = require("./scrapers/InfinitaScraper");
+import mediaStream = require("./scrapers/MediaStreamScraper");
+import newtown = require("./scrapers/NewtownRadioScraper");
+import radio2Nl = require("./scrapers/Radio2NLScraper");
+import kloveAir1 = require("./scrapers/KLoveAir1Scraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.STATION_CRYPTO_KEY;
@@ -112,13 +118,19 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	Absolute00s: new lfmScraper.LastfmScraper("Absolute00s", "absoluterad00s", LASTFM_API_KEY, true),
 	AbsoluteClassic: new lfmScraper.LastfmScraper("AbsoluteClassic", "absoluteclassic", LASTFM_API_KEY, true),
 	MutantRadio: new lfmScraper.LastfmScraper("MutantRadio", "mutant_radio", LASTFM_API_KEY),
-	StuBruRadio: new lfmScraper.LastfmScraper("StuBruRadio", "stubruradio", LASTFM_API_KEY, true)
+	StuBruRadio: new lfmScraper.LastfmScraper("StuBruRadio", "stubruradio", LASTFM_API_KEY, true),
+	Infinita: new infinita.InfinitaScraper("Infinita"),
+	Oasis: new mediaStream.MediaStreamScraper("Oasis", "5124ed51ed596bde7d000016"),
+	Horizonte: new mediaStream.MediaStreamScraper("Horizonte", "5124f1b4ed596bde7d000017"),
+	NewtownRadio: new newtown.NewtownRadioScraper("NewtownRadio"),
+	Radio2NL: new radio2Nl.Radio2NLScraper("Radio2NL"),
+	Air1: new kloveAir1.KLoveAir1RadioScraper("Air1", "2"),
+	KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1")
 };
 
 //////////////
 // Proper scrobbler
 //////////////
-/*
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
 	secret: LASTFM_SECRET,
@@ -156,7 +168,6 @@ mongodb.connect(MONGO_URI, (err, dbClient) => {
 	setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
 	scrapeAndScrobbleAllStations(stationDao, userDao);
 });
-*/
 
 //////////////
 // Scrobbler that scrapes but does not scrobble or load proper users/stations
@@ -188,7 +199,7 @@ setInterval(
 //////////////
 // Scrobbler that scrapes but does not scrobble and uses fake stations & users
 //////////////
-
+/*
 var stations = [
 	{ StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
 	{ StationName: "NNM", ScraperName: "NNM", Session: "NNMSession" },
@@ -237,7 +248,14 @@ var stations = [
 	{ StationName: "Absolute00s", ScraperName: "Absolute00s", Session: "Absolute00sSession" },
 	{ StationName: "AbsoluteClassic", ScraperName: "AbsoluteClassic", Session: "AbsoluteClassicSession" },
 	{ StationName: "MutantRadio", ScraperName: "MutantRadio", Session: "MutantRadioSession" },
-	{ StationName: "StuBruRadio", ScraperName: "StuBruRadio", Session: "StuBruRadioSession" }
+	{ StationName: "StuBruRadio", ScraperName: "StuBruRadio", Session: "StuBruRadioSession" },
+	{ StationName: "Infinita", ScraperName: "Infinita", Session: "InfinitaSession" },
+	{ StationName: "Oasis", ScraperName: "Oasis", Session: "OasisSession" },
+	{ StationName: "Horizonte", ScraperName: "Horizonte", Session: "HorizonteSession" },
+	{ StationName: "NewtownRadio", ScraperName: "NewtownRadio", Session: "NewtownRadioSession" },
+	{ StationName: "Radio2NL", ScraperName: "Radio2NL", Session: "Radio2NLSession" },
+	{ StationName: "Air1", ScraperName: "Air1", Session: "Air1Session" },
+	{ StationName: "KLove", ScraperName: "KLove", Session: "KLoveSession" }
 ];
 
 var usersListening = {
@@ -262,3 +280,4 @@ function testScrapeAndScrobble() {
 		}
 	});
 };
+*/
