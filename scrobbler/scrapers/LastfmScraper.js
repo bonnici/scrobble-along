@@ -12,11 +12,19 @@ var jsonScrap = require("./JsonScraper");
 
 var LastfmScraper = (function (_super) {
     __extends(LastfmScraper, _super);
-    function LastfmScraper(name, username, apiKey, ignoreListening) {
+    function LastfmScraper(name, apiKey, ignoreListening) {
         _super.call(this, name);
+        this.apiKey = apiKey;
         this.ignoreListening = ignoreListening;
-        this.url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + username + "&api_key=" + apiKey + "&limit=1&format=json";
     }
+    LastfmScraper.prototype.getUrl = function (lastfmUsername) {
+        if (!lastfmUsername) {
+            throw "lastfmUsername is required";
+        }
+
+        return "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + lastfmUsername + "&api_key=" + this.apiKey + "&limit=1&format=json";
+    };
+
     LastfmScraper.prototype.extractSong = function (jsonData) {
         var track = jsonData['recenttracks']['track'];
 

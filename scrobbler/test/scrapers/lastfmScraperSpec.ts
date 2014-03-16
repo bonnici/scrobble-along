@@ -18,7 +18,7 @@ function setupTest(jsonResponseCode: number, jsonResponse: string, username: str
 		.get(path)
 		.reply(jsonResponseCode, jsonResponse);
 
-	return new lfm.LastfmScraper("TestScraper", username, apiKey, requireListening);
+	return new lfm.LastfmScraper("TestScraper", apiKey, requireListening);
 }
 
 describe('LastfmScraper', () => {
@@ -38,7 +38,7 @@ describe('LastfmScraper', () => {
 					expect(err).not.toBeFalsy();
 					expect(song).toBeNull();
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);
@@ -139,7 +139,7 @@ describe('LastfmScraper', () => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);
@@ -203,7 +203,7 @@ describe('LastfmScraper', () => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);
@@ -301,7 +301,7 @@ describe('LastfmScraper', () => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);
@@ -399,7 +399,7 @@ describe('LastfmScraper', () => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);
@@ -496,7 +496,7 @@ describe('LastfmScraper', () => {
 					expect(err).toBeFalsy();
 					expect(song).toEqual({ Artist: null, Track: null });
 					done = true;
-				});
+				}, "username");
 			});
 
 			waitsFor(() => { return done; }, "Timeout", 5000);

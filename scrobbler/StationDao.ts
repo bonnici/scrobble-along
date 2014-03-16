@@ -51,8 +51,9 @@ export class MongoStationDao implements StationDao {
 					}
 					else {
 						var station = { 
-							StationName: record._id, 
-							ScraperName: record.parser, 
+							StationName: record._id,
+							ScraperName: record.parser,
+							ScraperParam: record.scraperParam,
 							Session: record.session ? this.crypter.decrypt(record.session) : null
 						};
 						winston.info("loaded station from DB", station.StationName);

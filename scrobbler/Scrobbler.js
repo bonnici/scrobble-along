@@ -37,6 +37,11 @@ var Scrobbler = (function () {
             return;
         }
 
+        if (!station) {
+            winston.error("Attempted to process invalid station:", station);
+            return;
+        }
+
         var scraperName = scraper.name;
 
         var stationData = this.stationData[scraperName];
@@ -47,7 +52,7 @@ var Scrobbler = (function () {
             this.stationData[scraperName] = stationData;
         }
 
-        scraper.fetchAndParse(function (err, newSong) {
+        var cb = function (err, newSong) {
             if (err) {
                 winston.error("Error scraping " + scraperName + ": " + err);
                 if (_this.lastUpdatedTooLongAgo(stationData, timestamp)) {
@@ -65,7 +70,9 @@ var Scrobbler = (function () {
                 stationData.nowPlayingSong = { Artist: newSong.Artist, Track: newSong.Track, StartTime: timestamp };
             }
             _this.postNowPlayingIfValid(stationData, station, users);
-        });
+        };
+
+        scraper.fetchAndParse(cb, station.ScraperParam);
     };
 
     Scrobbler.prototype.lastUpdatedTooLongAgo = function (stationData, timestamp) {

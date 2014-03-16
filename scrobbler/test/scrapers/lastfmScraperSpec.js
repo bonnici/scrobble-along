@@ -14,7 +14,7 @@ function setupTest(jsonResponseCode, jsonResponse, username, apiKey, requireList
 
     var scope = nock(host).get(path).reply(jsonResponseCode, jsonResponse);
 
-    return new lfm.LastfmScraper("TestScraper", username, apiKey, requireListening);
+    return new lfm.LastfmScraper("TestScraper", apiKey, requireListening);
 }
 
 describe('LastfmScraper', function () {
@@ -32,7 +32,7 @@ describe('LastfmScraper', function () {
                     expect(err).not.toBeFalsy();
                     expect(song).toBeNull();
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {
@@ -134,7 +134,7 @@ describe('LastfmScraper', function () {
                     expect(err).toBeFalsy();
                     expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {
@@ -199,7 +199,7 @@ describe('LastfmScraper', function () {
                     expect(err).toBeFalsy();
                     expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {
@@ -298,7 +298,7 @@ describe('LastfmScraper', function () {
                     expect(err).toBeFalsy();
                     expect(song).toEqual({ Artist: null, Track: null });
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {
@@ -397,7 +397,7 @@ describe('LastfmScraper', function () {
                     expect(err).toBeFalsy();
                     expect(song).toEqual({ Artist: "Dead Letter Circus", Track: "Big" });
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {
@@ -495,7 +495,7 @@ describe('LastfmScraper', function () {
                     expect(err).toBeFalsy();
                     expect(song).toEqual({ Artist: null, Track: null });
                     done = true;
-                });
+                }, "username");
             });
 
             waitsFor(function () {

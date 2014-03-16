@@ -16,6 +16,10 @@ var Radio2NLScraper = (function (_super) {
         _super.call(this, name);
         this.url = "http://www.radio2.nl/block/header/currentsong.json";
     }
+    Radio2NLScraper.prototype.getUrl = function (scraperParam) {
+        return this.url;
+    };
+
     Radio2NLScraper.prototype.extractSong = function (jsonData) {
         return {
             Artist: jsonData.data.songfile.artist.trim(),

@@ -17,8 +17,8 @@ export class JsonScraper extends scrap.Scraper {
 		super(name);
 	}
 
-	public fetchAndParse(callback:(err, song:song.Song) => void): void {
-		this.fetchUrl(this.url, (err, body) => {
+	public fetchAndParse(callback:(err, song:song.Song) => void, scraperParam?:string): void {
+		this.fetchUrl(this.getUrl(scraperParam), (err, body) => {
 			if (err) return callback(err, null);
 
 			if (!body) {
@@ -47,6 +47,10 @@ export class JsonScraper extends scrap.Scraper {
 
 			callback(null, { Artist: null, Track: null });
 		});
+	}
+
+	getUrl(scraperParam?:string): string {
+		throw "Abstract function"
 	}
 
 	extractSong(jsonData:any): song.Song {

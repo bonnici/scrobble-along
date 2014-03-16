@@ -16,6 +16,10 @@ var MediaStreamScraper = (function (_super) {
         _super.call(this, name);
         this.url = "http://nowplaying.mediastre.am/api/station/" + id + "/nowplaying";
     }
+    MediaStreamScraper.prototype.getUrl = function (scraperParam) {
+        return this.url;
+    };
+
     MediaStreamScraper.prototype.extractSong = function (jsonData) {
         return {
             Artist: jsonData.data.artist.name,

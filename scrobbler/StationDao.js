@@ -53,6 +53,7 @@ var MongoStationDao = (function () {
                         var station = {
                             StationName: record._id,
                             ScraperName: record.parser,
+                            ScraperParam: record.scraperParam,
                             Session: record.session ? _this.crypter.decrypt(record.session) : null
                         };
                         winston.info("loaded station from DB", station.StationName);

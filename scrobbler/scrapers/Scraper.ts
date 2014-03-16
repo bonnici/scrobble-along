@@ -13,7 +13,7 @@ export class Scraper {
 
 	// Should call success with a song if it was found, success with null artist/track if no song was found,
 	// failure if there was a recoverable error fetching or parsing
-	public fetchAndParse(callback: (err, song: song.Song) => void): void {
+	public fetchAndParse(callback: (err, song: song.Song) => void, scraperParam?:string): void {
 		throw new Error("Abstract");
 	}
 

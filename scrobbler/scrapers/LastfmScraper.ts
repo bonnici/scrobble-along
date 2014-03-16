@@ -7,10 +7,17 @@ import winston = require("winston");
 
 export class LastfmScraper extends jsonScrap.JsonScraper {
 
-	constructor(name:string, username:string, apiKey:string, private ignoreListening?:boolean) {
+	constructor(name:string, private apiKey:string, private ignoreListening?:boolean) {
 		super(name);
-		this.url = "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + username + "&api_key=" +
-			apiKey + "&limit=1&format=json"
+	}
+
+	getUrl(lastfmUsername?:string): string {
+		if (!lastfmUsername) {
+			throw "lastfmUsername is required";
+		}
+
+		return "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=" + lastfmUsername + "&api_key=" +
+			this.apiKey + "&limit=1&format=json"
 	}
 
 	extractSong(jsonData:any): song.Song {

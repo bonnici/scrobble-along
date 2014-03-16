@@ -18,7 +18,7 @@ var Scraper = (function () {
     }
     // Should call success with a song if it was found, success with null artist/track if no song was found,
     // failure if there was a recoverable error fetching or parsing
-    Scraper.prototype.fetchAndParse = function (callback) {
+    Scraper.prototype.fetchAndParse = function (callback, scraperParam) {
         throw new Error("Abstract");
     };
 

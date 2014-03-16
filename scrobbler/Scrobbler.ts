@@ -45,6 +45,11 @@ export class Scrobbler {
 			return;
 		}
 
+		if (!station) {
+			winston.error("Attempted to process invalid station:", station);
+			return;
+		}
+
 		var scraperName = scraper.name;
 
 		var stationData = this.stationData[scraperName];
@@ -55,7 +60,7 @@ export class Scrobbler {
 			this.stationData[scraperName] = stationData;
 		}
 
-		scraper.fetchAndParse((err, newSong:song.Song) => {
+		var cb = (err, newSong:song.Song) => {
 			if (err) {
 				winston.error("Error scraping " + scraperName + ": " + err);
 				if (this.lastUpdatedTooLongAgo(stationData, timestamp)) {
@@ -75,7 +80,9 @@ export class Scrobbler {
 				stationData.nowPlayingSong = { Artist: newSong.Artist, Track: newSong.Track, StartTime: timestamp };
 			}
 			this.postNowPlayingIfValid(stationData, station, users);
-		});
+		};
+
+		scraper.fetchAndParse(cb, station.ScraperParam);
 	}
 
 	private lastUpdatedTooLongAgo(stationData:ScrobblerStationData, timestamp:number) {

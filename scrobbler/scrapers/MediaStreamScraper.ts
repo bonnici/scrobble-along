@@ -12,6 +12,10 @@ export class MediaStreamScraper extends jsonScrap.JsonScraper {
 		this.url = "http://nowplaying.mediastre.am/api/station/" + id + "/nowplaying";
 	}
 
+	getUrl(scraperParam?:string): string {
+		return this.url;
+	}
+
 	extractSong(jsonData:any): song.Song {
 		return {
 			Artist: jsonData.data.artist.name,

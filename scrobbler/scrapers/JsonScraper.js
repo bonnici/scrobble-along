@@ -19,9 +19,9 @@ var JsonScraper = (function (_super) {
     function JsonScraper(name) {
         _super.call(this, name);
     }
-    JsonScraper.prototype.fetchAndParse = function (callback) {
+    JsonScraper.prototype.fetchAndParse = function (callback, scraperParam) {
         var _this = this;
-        this.fetchUrl(this.url, function (err, body) {
+        this.fetchUrl(this.getUrl(scraperParam), function (err, body) {
             if (err)
                 return callback(err, null);
 
@@ -49,6 +49,10 @@ var JsonScraper = (function (_super) {
 
             callback(null, { Artist: null, Track: null });
         });
+    };
+
+    JsonScraper.prototype.getUrl = function (scraperParam) {
+        throw "Abstract function";
     };
 
     JsonScraper.prototype.extractSong = function (jsonData) {
