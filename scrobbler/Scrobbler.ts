@@ -112,7 +112,9 @@ export class Scrobbler {
 		this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
 
 		_.each(users, (user) => {
-			this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+			if (user) {
+				this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+			}
 		});
 	}
 
@@ -125,7 +127,9 @@ export class Scrobbler {
 		this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
 
 		_.each(users, (user) => {
-			this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
+			if (user) {
+				this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
+			}
 		});
 	}
 }

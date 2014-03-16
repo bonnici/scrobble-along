@@ -96,7 +96,9 @@ var Scrobbler = (function () {
         this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
 
         _.each(users, function (user) {
-            _this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+            if (user) {
+                _this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+            }
         });
     };
 
@@ -109,7 +111,9 @@ var Scrobbler = (function () {
         this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, station.StationName, station.Session);
 
         _.each(users, function (user) {
-            _this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
+            if (user) {
+                _this.lastFmDao.postNowPlaying(stationData.nowPlayingSong, user.UserName, user.Session);
+            }
         });
     };
     return Scrobbler;
