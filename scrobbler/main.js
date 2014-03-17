@@ -2,17 +2,6 @@
 /// <reference path="../definitions/DefinitelyTyped/underscore/underscore.d.ts"/>
 /// <reference path="../definitions/dummy-definitions/lastfm.d.ts"/>
 /// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
-/*
-Transition plan:
-* Turn off scrobbling on the appfog app & permenantly enable this scrobbler
-* Remove all sessions
-* Update all None scrapers to last.fm scraper
-* Add parameters for scrapers in DB
-* Push to github and get on server
-* Do front-end stuff & send to appfog
-* Add option to clear all listening & clear sessions
-* Work out how to run front-end stuff on server
-*/
 var _ = require("underscore");
 var lastfm = require("lastfm");
 var mongodb = require("mongodb");
@@ -55,12 +44,12 @@ var radio2Nl = require("./scrapers/Radio2NLScraper");
 var kloveAir1 = require("./scrapers/KLoveAir1Scraper");
 
 // Required environment variables
-var STATION_CRYPTO_KEY = process.env.STATION_CRYPTO_KEY;
-var USER_CRYPTO_KEY = process.env.USER_CRYPTO_KEY;
-var MONGO_URI = process.env.MONGO_URI;
-var LASTFM_API_KEY = process.env.LASTFM_API_KEY;
-var LASTFM_SECRET = process.env.LASTFM_SECRET;
-var SHOULD_SCROBBLE = process.env.SHOULD_SCROBBLE;
+var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
+var USER_CRYPTO_KEY = process.env.SA_USER_CRYPTO_KEY;
+var MONGO_URI = process.env.SA_MONGO_URI;
+var LASTFM_API_KEY = process.env.SA_LASTFM_API_KEY;
+var LASTFM_SECRET = process.env.SA_LASTFM_SECRET;
+var SHOULD_SCROBBLE = process.env.SA_SHOULD_SCROBBLE;
 
 if (!STATION_CRYPTO_KEY || !USER_CRYPTO_KEY || !MONGO_URI || !LASTFM_API_KEY || !LASTFM_SECRET || !SHOULD_SCROBBLE) {
     winston.error("A required environment variable is missing:", process.env);
