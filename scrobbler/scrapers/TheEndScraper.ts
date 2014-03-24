@@ -1,53 +1,34 @@
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 
-import scrap = require("Scraper");
+import scrap = require("JsonScraper");
 import song = require("../Song");
 
 import winston = require("winston");
 
-export class TheEndScraper extends scrap.Scraper {
-	private url: string;
-
+export class TheEndScraper extends scrap.JsonScraper {
 	constructor(name:string) {
 		super(name);
-		this.url = "http://kndd.tunegenie.com/w2/pluginhour/since/kndd/";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	getUrl(): string {
+		var baseUrl = "http://kndd.tunegenie.com/w2/pluginhour/since/kndd/";
 		var sinceTime = new Date().getTime() - (60 * 60 * 1000); // Get all of last hour's songs
-		var timestampedUrl = this.url + sinceTime + "/?x=" + new Date().getTime();
-		this.fetchUrl(timestampedUrl, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseJson(body, callback);
-		});
+		var timestampedUrl = baseUrl + sinceTime + "/?x=" + new Date().getTime();
+		return timestampedUrl;
 	}
 
-	private parseJson(body: string, callback: (err, song:song.Song) => void): void {
-		if (!body) {
-			return callback(null, { Artist: null, Track: null });
+	extractNowPlayingSong(jsonData:any): song.Song {
+		var lastTrack = jsonData.length - 1;
+
+		if (!jsonData[lastTrack].artistName || !jsonData[lastTrack].trackName) {
+			winston.warn("TheEndScraper: Invalid last track", {
+				trackName: jsonData[lastTrack].trackName,
+				artistName: jsonData[lastTrack].artistName
+			});
+			return { Artist: null, Track: null };
 		}
 
-		try {
-			var json = JSON.parse(body);
-		}
-		catch (e) {
-			winston.error("Could not parse JSON body", body);
-			return callback("Could not parse JSON body", null);
-		}
-
-		if (!json || json.length == 0) {
-			winston.warn("TheEndScraper: Invalid json", json);
-			return callback(null, { Artist: null, Track: null });
-		}
-
-		var lastTrack = json.length - 1;
-
-		if (!json[lastTrack].artistName || !json[lastTrack].trackName) {
-			winston.warn("TheEndScraper: Invalid last track", { trackName: json[lastTrack].trackName, artistName: json[lastTrack].artistName });
-			return callback(null, { Artist: null, Track: null });
-		}
-
-		winston.info("TheEndScraper found song " + json[lastTrack].artistName + " - " + json[lastTrack].trackName);
-		return callback(null, { Artist: json[lastTrack].artistName, Track: json[lastTrack].trackName });
+		winston.info("TheEndScraper found song " + jsonData[lastTrack].artistName + " - " + jsonData[lastTrack].trackName);
+		return { Artist: jsonData[lastTrack].artistName, Track: jsonData[lastTrack].trackName };
 	}
 }

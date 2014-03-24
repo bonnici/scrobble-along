@@ -11,15 +11,16 @@ To use, set this.url in the constructor after calling super and implement extrac
 */
 
 export class JsonScraper extends scrap.Scraper {
-	url: string;
-
 	constructor(name:string) {
 		super(name);
 	}
 
-	public fetchAndParse(callback:(err, song:song.Song) => void, scraperParam?:string): void {
+	public fetchAndParse(callback:(err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void, scraperParam?:string): void {
 		this.fetchUrl(this.getUrl(scraperParam), (err, body) => {
-			if (err) return callback(err, null);
+			if (err) {
+				callback(err, null);
+				return;
+			}
 
 			if (!body) {
 				winston.warn("JsonScraper: No/invalid body", body);
@@ -37,8 +38,9 @@ export class JsonScraper extends scrap.Scraper {
 			}
 
 			try {
-				var curSong = this.extractSong(json);
-				callback(null, curSong);
+				var nowPlayingSong = this.extractNowPlayingSong(json);
+				var justPlayedSong = this.extractJustPlayedSong(json);
+				callback(null, nowPlayingSong, justPlayedSong);
 				return;
 			}
 			catch (err) {
@@ -50,10 +52,14 @@ export class JsonScraper extends scrap.Scraper {
 	}
 
 	getUrl(scraperParam?:string): string {
-		throw "Abstract function"
+		throw "Abstract function";
 	}
 
-	extractSong(jsonData:any): song.Song {
-		throw "Abstract function"
+	extractNowPlayingSong(jsonData:any): song.Song {
+		return null;
+	}
+
+	extractJustPlayedSong(jsonData:any): song.Song {
+		return null;
 	}
 }

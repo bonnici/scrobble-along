@@ -27,13 +27,13 @@ export class NnmScraper extends scrap.Scraper {
 		this.jsonUrl2 = jsonUrl2 || "http://p2.radiocdn.com/player.php?hash=69d494aa557d8028daf3100b0538f48e48c53925&action=getCurrentData&_=%s";
 	}
 
-	public fetchAndParse(callback:(err, song:song.Song) => void): void {
+	public fetchAndParse(callback:(err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		// First try the marci URL (which contains full track/artist names
 		this.tryParseMarci(this.marciUrl, (err, marciSong) => {
 			if (!err) {
 				winston.info("NnmScraper found song from Marci", marciSong);
 				callback(null, marciSong);
-				return
+				return;
 			}
 
 			// Try each json URL if the marci URL fails
@@ -42,18 +42,19 @@ export class NnmScraper extends scrap.Scraper {
 				if (!err) {
 					winston.info("NnmScraper found song from JSON URL 1", jsonSong1);
 					callback(null, jsonSong1);
-					return
+					return;
 				}
 
 				var fullUrl2 = util.format(this.jsonUrl2, this.startTime());
 				this.tryParseJson(fullUrl2, (err, jsonSong2) => {
 					if (!err) {
 						winston.info("NnmScraper found song from JSON URL 2", jsonSong2);
-						return callback(null, jsonSong2);
+						callback(null, jsonSong2);
+						return;
 					}
 					winston.info("NnmScraper could not find song");
 					callback(err, null);
-					return
+					return;
 				});
 			});
 		});
@@ -66,14 +67,18 @@ export class NnmScraper extends scrap.Scraper {
 
 	private tryParseJson(url: string, callback: (err, song:song.Song) => void): void {
 		this.fetchUrl(url, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseJson(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseJson(body, callback);
 		});
 	}
 
 	private parseJson(body: string, callback: (err, song:song.Song) => void): void {
 		if (!body) {
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		try {
@@ -81,44 +86,54 @@ export class NnmScraper extends scrap.Scraper {
 		}
 		catch (e) {
 			winston.error("Could not parse JSON body", body);
-			return callback("Could not parse JSON body", null);
+			callback("Could not parse JSON body", null);
+			return;
 		}
 
 		if (json && json.artist && json.track) {
 			if (this.artistFiltered(json.artist)) {
-				return callback(null, { Artist: null, Track: null });
+				callback(null, { Artist: null, Track: null });
+				return;
 			}
 			else {
-				return callback(null, { Artist: json.artist, Track: json.track });
+				callback(null, { Artist: json.artist, Track: json.track });
+				return;
 			}
 		}
 		else {
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 	}
 
 	private tryParseMarci(url: string, callback: (err, song:song.Song) => void): void {
 		this.fetchUrl(url, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseMarci(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseMarci(body, callback);
 		});
 	}
 
 	private parseMarci(body: string, callback: (err, song:song.Song) => void): void {
 		if (!body) {
-			return callback("Blank marci", null);
+			callback("Blank marci", null);
+			return;
 		}
 
 		var $ = cheerio.load(body);
 		var block1:any = $('#block1').first();
 		var letterbox1:any = block1.children('#letterbox1').first();
 		if (!letterbox1 || letterbox1.length == 0) {
-			return callback("Could not parse marci", null);
+			callback("Could not parse marci", null);
+			return;
 		}
 
 		var onAir = block1.children('.on-air');
 		if (!onAir || onAir.length == 0) {
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		if (letterbox1) {
@@ -127,15 +142,18 @@ export class NnmScraper extends scrap.Scraper {
 
 			if (artist && track) {
 				if (this.artistFiltered(artist)) {
-					return callback(null, { Artist: null, Track: null });
+					callback(null, { Artist: null, Track: null });
+					return;
 				}
 				else {
-					return callback(null, { Artist: artist, Track: track });
+					callback(null, { Artist: artist, Track: track });
+					return;
 				}
 			}
 		}
 
-		return callback("Could not parse marci", null);
+		callback("Could not parse marci", null);
+		return;
 	}
 
 	private artistFiltered(artist: string) {

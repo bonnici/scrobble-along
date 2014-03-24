@@ -16,11 +16,14 @@ export class WzbcScraper extends scrap.Scraper {
 		this.url = "http://spinitron.com/public/index.php?station=wzbc";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		var headers = { 'User-Agent': "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1687.2 Safari/537.36" };
 		this.fetchUrlWithHeaders(this.url, headers, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseHtml(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseHtml(body, callback);
 		});
 	}
 

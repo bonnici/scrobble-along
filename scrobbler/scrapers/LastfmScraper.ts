@@ -7,7 +7,7 @@ import winston = require("winston");
 
 export class LastfmScraper extends jsonScrap.JsonScraper {
 
-	constructor(name:string, private apiKey:string, private ignoreListening?:boolean) {
+	constructor(name:string, private apiKey:string) {
 		super(name);
 	}
 
@@ -20,14 +20,14 @@ export class LastfmScraper extends jsonScrap.JsonScraper {
 			this.apiKey + "&limit=1&format=json"
 	}
 
-	extractSong(jsonData:any): song.Song {
+	extractNowPlayingSong(jsonData:any): song.Song {
 		var track = jsonData['recenttracks']['track'];
 
 		if (!track["artist"]) {
 			track = track[0];
 		}
 
-		if (this.ignoreListening || track["@attr"] && track["@attr"]["nowplaying"] == "true") {
+		if (track["@attr"] && track["@attr"]["nowplaying"] == "true") {
 			return { Artist: track['artist']['#text'], Track: track['name'] };
 		}
 

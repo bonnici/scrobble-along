@@ -13,13 +13,13 @@ export class Scraper {
 
 	// Should call success with a song if it was found, success with null artist/track if no song was found,
 	// failure if there was a recoverable error fetching or parsing
-	public fetchAndParse(callback: (err, song: song.Song) => void, scraperParam?:string): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void, scraperParam?:string): void {
 		throw new Error("Abstract");
 	}
 
 	// protected
 	public fetchUrl(fullUrl: string, callback: (err, body:string) => void): void {
-		return this.fetchUrlWithHeaders(fullUrl, null, callback);
+		this.fetchUrlWithHeaders(fullUrl, null, callback);
 	}
 
 	// protected
@@ -30,20 +30,20 @@ export class Scraper {
 		}
 		request({ url: fullUrl, headers: headers || {} }, function (error, response, body) {
 			if (!error && response.statusCode == 200) {
-				return callback(null, body);
+				callback(null, body);
+				return;
 			}
 
 			if (error) {
 				var errorStr = "Error requesting URL " + fullUrl;
 				winston.error(errorStr, error);
-				return callback(errorStr, null);
+				callback(errorStr, null);
 			}
 			else {
 				var errorStr = "Bad status code (" + response.statusCode + ") fetching URL " + fullUrl;
 				winston.warn(errorStr);
-				return callback(errorStr, null);
+				callback(errorStr, null);
 			}
-
 		});
 	}
 }
@@ -60,7 +60,8 @@ export class DummyScraper extends Scraper {
 			{ Artist: "Artist 3 " + this.suffix, Track: "Track 3 " + this.suffix }
 		];
 		var index =  Math.floor(Math.random()*songs.length);
-		return callback(null, songs[index]);
+		callback(null, songs[index]);
+		return;
 	}
 
 }

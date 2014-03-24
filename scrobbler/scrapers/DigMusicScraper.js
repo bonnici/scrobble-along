@@ -6,7 +6,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var scrap = require("./Scraper");
+var scrap = require("./JsonScraper");
 
 
 var _ = require("underscore");
@@ -18,35 +18,14 @@ var DigMusicScraper = (function (_super) {
         _super.call(this, name);
         this.url = baseUrl || "http://digmusic.net.au/player-data.php";
     }
-    DigMusicScraper.prototype.fetchAndParse = function (callback) {
-        var _this = this;
-        this.fetchUrl(this.url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseJson(body, callback);
-        });
+    DigMusicScraper.prototype.getUrl = function (lastfmUsername) {
+        return this.url;
     };
 
-    DigMusicScraper.prototype.parseJson = function (body, callback) {
-        if (!body) {
-            winston.warn("DigMusicScraper: No/invalid body", body);
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        try  {
-            var json = JSON.parse(body);
-        } catch (e) {
-            winston.error("Could not parse JSON body", body);
-            return callback("Could not parse JSON body", null);
-        }
-
-        if (!json) {
-            winston.warn("DigMusicScraper: Invalid JSON", json);
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        var artistName, title;
-        _.each(json, function (element) {
+    DigMusicScraper.prototype.extractNowPlayingSong = function (jsonData) {
+        var artistName = null;
+        var title = null;
+        _.each(jsonData, function (element) {
             if (element && element.playing == 'now') {
                 artistName = element.artistName;
                 title = element.title;
@@ -55,14 +34,14 @@ var DigMusicScraper = (function (_super) {
 
         if (!artistName || !title) {
             winston.info("DigMusicScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            return { Artist: null, Track: null };
         } else {
             winston.info("DigMusicScraper found song " + artistName + " - " + title);
-            return callback(null, { Artist: artistName, Track: title });
+            return { Artist: artistName, Track: title };
         }
     };
     return DigMusicScraper;
-})(scrap.Scraper);
+})(scrap.JsonScraper);
 exports.DigMusicScraper = DigMusicScraper;
 
 //# sourceMappingURL=DigMusicScraper.js.map

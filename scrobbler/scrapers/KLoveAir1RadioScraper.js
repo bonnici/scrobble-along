@@ -53,4 +53,4 @@ var KLoveAir1RadioScraper = (function (_super) {
 })(scrap.Scraper);
 exports.KLoveAir1RadioScraper = KLoveAir1RadioScraper;
 
-//# sourceMappingURL=KLoveAir1Scraper.js.map
+//# sourceMappingURL=KLoveAir1RadioScraper.js.map

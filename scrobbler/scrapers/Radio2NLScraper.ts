@@ -9,14 +9,13 @@ export class Radio2NLScraper extends jsonScrap.JsonScraper {
 
 	constructor(name:string) {
 		super(name);
-		this.url = "http://www.radio2.nl/block/header/currentsong.json";
 	}
 
 	getUrl(scraperParam?:string): string {
-		return this.url;
+		return "http://www.radio2.nl/block/header/currentsong.json";
 	}
 
-	extractSong(jsonData:any): song.Song {
+	extractNowPlayingSong(jsonData:any): song.Song {
 		return {
 			Artist: jsonData.data.songfile.artist.trim(),
 			Track: jsonData.data.songfile.title.trim()

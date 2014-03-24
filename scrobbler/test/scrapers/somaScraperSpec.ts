@@ -18,6 +18,7 @@ describe('SomaScraper', () => {
             var host = "http://somafm.com";   
             var path = "/" + station + "/songhistory.html";
 
+	        console.log("rebuild");
             var scope = nock(host)
                 .get(path);
 

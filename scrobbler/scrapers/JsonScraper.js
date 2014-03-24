@@ -22,8 +22,10 @@ var JsonScraper = (function (_super) {
     JsonScraper.prototype.fetchAndParse = function (callback, scraperParam) {
         var _this = this;
         this.fetchUrl(this.getUrl(scraperParam), function (err, body) {
-            if (err)
-                return callback(err, null);
+            if (err) {
+                callback(err, null);
+                return;
+            }
 
             if (!body) {
                 winston.warn("JsonScraper: No/invalid body", body);
@@ -40,8 +42,9 @@ var JsonScraper = (function (_super) {
             }
 
             try  {
-                var curSong = _this.extractSong(json);
-                callback(null, curSong);
+                var nowPlayingSong = _this.extractNowPlayingSong(json);
+                var justPlayedSong = _this.extractJustPlayedSong(json);
+                callback(null, nowPlayingSong, justPlayedSong);
                 return;
             } catch (err) {
                 winston.warn("JsonScraper: Invalid JSON", json);
@@ -55,8 +58,12 @@ var JsonScraper = (function (_super) {
         throw "Abstract function";
     };
 
-    JsonScraper.prototype.extractSong = function (jsonData) {
-        throw "Abstract function";
+    JsonScraper.prototype.extractNowPlayingSong = function (jsonData) {
+        return null;
+    };
+
+    JsonScraper.prototype.extractJustPlayedSong = function (jsonData) {
+        return null;
     };
     return JsonScraper;
 })(scrap.Scraper);

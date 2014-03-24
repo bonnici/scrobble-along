@@ -14,13 +14,12 @@ var Radio2NLScraper = (function (_super) {
     __extends(Radio2NLScraper, _super);
     function Radio2NLScraper(name) {
         _super.call(this, name);
-        this.url = "http://www.radio2.nl/block/header/currentsong.json";
     }
     Radio2NLScraper.prototype.getUrl = function (scraperParam) {
-        return this.url;
+        return "http://www.radio2.nl/block/header/currentsong.json";
     };
 
-    Radio2NLScraper.prototype.extractSong = function (jsonData) {
+    Radio2NLScraper.prototype.extractNowPlayingSong = function (jsonData) {
         return {
             Artist: jsonData.data.songfile.artist.trim(),
             Track: jsonData.data.songfile.title.trim()

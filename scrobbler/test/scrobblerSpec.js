@@ -19,6 +19,7 @@ describe("Scrobbler", function () {
         beforeEach(function () {
             mockScraper = new scrap.DummyScraper("");
             fetchAndParseSpy = spyOn(mockScraper, 'fetchAndParse');
+            console.log("rebuild");
 
             lastFmDao = new lfmDao.DummyLastFmDao();
             spyOn(lastFmDao, 'postNowPlaying');

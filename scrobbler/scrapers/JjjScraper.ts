@@ -1,13 +1,11 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 
-import scrap = require("Scraper");
+import scrap = require("CheerioScraper");
 import song = require("../Song");
 
-import cheerio = require("cheerio");
 import winston = require("winston");
 
-export class JjjScraper extends scrap.Scraper {
+export class JjjScraper extends scrap.CheerioScraper {
 	private baseUrl: string;
 
 	constructor(name:string, baseUrl?: string) {
@@ -15,15 +13,11 @@ export class JjjScraper extends scrap.Scraper {
 		this.baseUrl = baseUrl || "http://www.abc.net.au/triplej/feeds/playout/triplej_sydney_playout.xml";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
-		this.fetchUrl(this.baseUrl, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parse(body, callback);
-		});
+	public getUrl(): string {
+		return this.baseUrl;
 	}
 
-	private parse(body: string, callback: (err, song:song.Song) => void): void {
-		var $ = cheerio.load(body);
+	public parseCheerio($:any, callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		var nowPlayingItem = $.root().find('item').first();
 		var playingTime: any = nowPlayingItem.find('playing');
 
@@ -37,12 +31,13 @@ export class JjjScraper extends scrap.Scraper {
 
 				if (artist && track) {
 					winston.info("JjjScraper found song " + artist + " - " + track);
-					return callback(null, { Artist: artist, Track: track });
+					callback(null, { Artist: artist, Track: track });
+					return;
 				}
 			}
 		}
 
 		winston.info("JjjScraper could not find song");
-		return callback(null, { Artist: null, Track: null });
+		callback(null, { Artist: null, Track: null });
 	}
 }

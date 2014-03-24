@@ -1,33 +1,20 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 
-import scrap = require("Scraper");
+import scrap = require("CheerioScraper");
 import song = require("../Song");
 
-import cheerio = require("cheerio");
 import winston = require("winston");
 
-export class GoldRadioScraper extends scrap.Scraper {
-	private url: string;
-
+export class GoldRadioScraper extends scrap.CheerioScraper {
 	constructor(name:string) {
 		super(name);
-		this.url = "http://www.mygoldmusic.co.uk/jsfiles/NowPlayingDisplay.aspx?f=http%3A%2F%2Frope%2Eicgo%2Efimc%2Enet%2FFeeds%2FNowPlaying%2FGCap%5FMedia%2FGold%5FNetwork%2FGold%5FLondon%2F5853%2Exml&l=5853&tzc=8";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
-		this.fetchUrl(this.url, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseHtml(body, callback);
-		});
+	public getUrl(): string {
+		return "http://www.mygoldmusic.co.uk/jsfiles/NowPlayingDisplay.aspx?f=http%3A%2F%2Frope%2Eicgo%2Efimc%2Enet%2FFeeds%2FNowPlaying%2FGCap%5FMedia%2FGold%5FNetwork%2FGold%5FLondon%2F5853%2Exml&l=5853&tzc=8";
 	}
 
-	private parseHtml(body: string, callback: (err, song:song.Song) => void): void {
-		if (!body) {
-			winston.warn("GoldRadioScraper: No HTML body");
-			return callback(null, { Artist: null, Track: null });
-		}
-
+	public parseCheerio($:any, callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		/*
 		 e.g.
 		 <div id="RcsPlayingPrevTitle"></div>
@@ -42,14 +29,13 @@ export class GoldRadioScraper extends scrap.Scraper {
 		 <div id="RcsNextInSeconds">229</div>
 		 */
 
-		var $ = cheerio.load(body);
-
 		var artistDiv = $('div#RcsPlayingNowArtist');
 		var songDiv = $('div#RcsPlayingNowSong');
 
 		if (artistDiv.length < 1 || songDiv.length < 1) {
 			winston.warn("GoldRadioScraper: No artist or song div", { artistDivLength: artistDiv.length, songDivLength: songDiv.length });
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		var artistText = artistDiv.eq(0).text();
@@ -57,7 +43,8 @@ export class GoldRadioScraper extends scrap.Scraper {
 
 		if (!artistText.trim() || !titleText.trim()) {
 			winston.warn("GoldRadioScraper: Blank artist or title", { artistText: artistText, titleText: titleText });
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		// artist includes a trailing comma so substring it out
@@ -68,11 +55,11 @@ export class GoldRadioScraper extends scrap.Scraper {
 
 		if (artistText && titleText) {
 			winston.info("GoldRadioScraper found song " + artistText + " - " + titleText);
-			return callback(null, { Artist: artistText, Track: titleText });
+			callback(null, { Artist: artistText, Track: titleText });
 		}
 		else {
 			winston.info("GoldRadioScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
 		}
 	}
 }

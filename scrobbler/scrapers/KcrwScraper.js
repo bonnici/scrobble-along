@@ -1,4 +1,3 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -6,47 +5,35 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var scrap = require("./Scraper");
+var scrap = require("./CheerioScraper");
 
 
-var cheerio = require("cheerio");
 var winston = require("winston");
 
 var KcrwScraper = (function (_super) {
     __extends(KcrwScraper, _super);
     function KcrwScraper(name) {
         _super.call(this, name);
-        this.url = "http://newmedia.kcrw.com/tracklists/index.php?channel=Live";
     }
-    KcrwScraper.prototype.fetchAndParse = function (callback) {
-        var _this = this;
-        this.fetchUrl(this.url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseHtml(body, callback);
-        });
+    KcrwScraper.prototype.getUrl = function () {
+        return "http://newmedia.kcrw.com/tracklists/index.php?channel=Live";
     };
 
-    KcrwScraper.prototype.parseHtml = function (body, callback) {
-        if (!body) {
-            winston.warn("KcrwScraper: No HTML body");
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        var $ = cheerio.load(body);
-
+    KcrwScraper.prototype.parseCheerio = function ($, callback) {
         var playlistRows = $("table#table_tracklist tbody tr");
 
         if (playlistRows.length < 1) {
             winston.warn("KcrwScraper: Not enough playlist rows (" + playlistRows.length + ")");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         var firstSongRow = playlistRows.eq(0);
 
         if (firstSongRow.children("td").length < 3) {
             winston.warn("KcrwScraper: Not enough playlist cols (" + firstSongRow.children("td").length + ")");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         var artist = firstSongRow.children("td").eq(1).text();
@@ -54,14 +41,15 @@ var KcrwScraper = (function (_super) {
 
         if (!artist || artist == '' || !song || song == '' || artist == 'Break' || song == "Break") {
             winston.warn("KcrwScraper: Invalid cols (" + artist + "/" + song + ")");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         winston.info("KcrwScraper found song " + artist + " - " + song);
-        return callback(null, { Artist: artist, Track: song });
+        callback(null, { Artist: artist, Track: song });
     };
     return KcrwScraper;
-})(scrap.Scraper);
+})(scrap.CheerioScraper);
 exports.KcrwScraper = KcrwScraper;
 
 //# sourceMappingURL=KcrwScraper.js.map

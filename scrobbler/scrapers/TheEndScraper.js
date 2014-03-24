@@ -5,7 +5,7 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var scrap = require("./Scraper");
+var scrap = require("./JsonScraper");
 
 
 var winston = require("winston");
@@ -14,48 +14,30 @@ var TheEndScraper = (function (_super) {
     __extends(TheEndScraper, _super);
     function TheEndScraper(name) {
         _super.call(this, name);
-        this.url = "http://kndd.tunegenie.com/w2/pluginhour/since/kndd/";
     }
-    TheEndScraper.prototype.fetchAndParse = function (callback) {
-        var _this = this;
+    TheEndScraper.prototype.getUrl = function () {
+        var baseUrl = "http://kndd.tunegenie.com/w2/pluginhour/since/kndd/";
         var sinceTime = new Date().getTime() - (60 * 60 * 1000);
-        var timestampedUrl = this.url + sinceTime + "/?x=" + new Date().getTime();
-        this.fetchUrl(timestampedUrl, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseJson(body, callback);
-        });
+        var timestampedUrl = baseUrl + sinceTime + "/?x=" + new Date().getTime();
+        return timestampedUrl;
     };
 
-    TheEndScraper.prototype.parseJson = function (body, callback) {
-        if (!body) {
-            return callback(null, { Artist: null, Track: null });
+    TheEndScraper.prototype.extractNowPlayingSong = function (jsonData) {
+        var lastTrack = jsonData.length - 1;
+
+        if (!jsonData[lastTrack].artistName || !jsonData[lastTrack].trackName) {
+            winston.warn("TheEndScraper: Invalid last track", {
+                trackName: jsonData[lastTrack].trackName,
+                artistName: jsonData[lastTrack].artistName
+            });
+            return { Artist: null, Track: null };
         }
 
-        try  {
-            var json = JSON.parse(body);
-        } catch (e) {
-            winston.error("Could not parse JSON body", body);
-            return callback("Could not parse JSON body", null);
-        }
-
-        if (!json || json.length == 0) {
-            winston.warn("TheEndScraper: Invalid json", json);
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        var lastTrack = json.length - 1;
-
-        if (!json[lastTrack].artistName || !json[lastTrack].trackName) {
-            winston.warn("TheEndScraper: Invalid last track", { trackName: json[lastTrack].trackName, artistName: json[lastTrack].artistName });
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        winston.info("TheEndScraper found song " + json[lastTrack].artistName + " - " + json[lastTrack].trackName);
-        return callback(null, { Artist: json[lastTrack].artistName, Track: json[lastTrack].trackName });
+        winston.info("TheEndScraper found song " + jsonData[lastTrack].artistName + " - " + jsonData[lastTrack].trackName);
+        return { Artist: jsonData[lastTrack].artistName, Track: jsonData[lastTrack].trackName };
     };
     return TheEndScraper;
-})(scrap.Scraper);
+})(scrap.JsonScraper);
 exports.TheEndScraper = TheEndScraper;
 
 //# sourceMappingURL=TheEndScraper.js.map

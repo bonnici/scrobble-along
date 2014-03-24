@@ -24,7 +24,7 @@ var Scraper = (function () {
 
     // protected
     Scraper.prototype.fetchUrl = function (fullUrl, callback) {
-        return this.fetchUrlWithHeaders(fullUrl, null, callback);
+        this.fetchUrlWithHeaders(fullUrl, null, callback);
     };
 
     // protected
@@ -35,17 +35,18 @@ var Scraper = (function () {
         }
         request({ url: fullUrl, headers: headers || {} }, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                return callback(null, body);
+                callback(null, body);
+                return;
             }
 
             if (error) {
                 var errorStr = "Error requesting URL " + fullUrl;
                 winston.error(errorStr, error);
-                return callback(errorStr, null);
+                callback(errorStr, null);
             } else {
                 var errorStr = "Bad status code (" + response.statusCode + ") fetching URL " + fullUrl;
                 winston.warn(errorStr);
-                return callback(errorStr, null);
+                callback(errorStr, null);
             }
         });
     };
@@ -66,7 +67,8 @@ var DummyScraper = (function (_super) {
             { Artist: "Artist 3 " + this.suffix, Track: "Track 3 " + this.suffix }
         ];
         var index = Math.floor(Math.random() * songs.length);
-        return callback(null, songs[index]);
+        callback(null, songs[index]);
+        return;
     };
     return DummyScraper;
 })(Scraper);

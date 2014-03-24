@@ -60,26 +60,41 @@ export class Scrobbler {
 			this.stationData[scraperName] = stationData;
 		}
 
-		var cb = (err, newSong:song.Song) => {
+		var cb = (err, newNowPlayingSong:song.Song, justScrobbledSong?:song.Song) => {
 			if (err) {
 				winston.error("Error scraping " + scraperName + ": " + err);
 				if (this.lastUpdatedTooLongAgo(stationData, timestamp)) {
-					this.scrobbleNowPlayingIfValid(stationData, station, users);
+					this.scrobbleNowPlayingIfValid(stationData, null, station, users);
 					stationData.nowPlayingSong = { Artist: null, Track: null, StartTime: timestamp };
 					stationData.lastUpdatedTime = null;
 				}
 				return;
 			}
 
+			if (justScrobbledSong && newNowPlayingSong) {
+				winston.error("Only one of newNowPlayingSong and justScrobbledSong should be set");
+				return;
+			}
+
 			stationData.lastUpdatedTime = timestamp;
 
-			if (!newSong || !stationData.nowPlayingSong || newSong.Artist != stationData.nowPlayingSong.Artist ||
-				newSong.Track != stationData.nowPlayingSong.Track) {
-
-				this.scrobbleNowPlayingIfValid(stationData, station, users);
-				stationData.nowPlayingSong = { Artist: newSong.Artist, Track: newSong.Track, StartTime: timestamp };
+			// justScrobbledSong should be set if the scraper can't figure out what is currently playing
+			if (justScrobbledSong) {
+				this.scrobbleNowPlayingIfValid(stationData, justScrobbledSong, station, users);
 			}
-			this.postNowPlayingIfValid(stationData, station, users);
+			else {
+				if (!newNowPlayingSong || !stationData.nowPlayingSong ||
+					newNowPlayingSong.Artist != stationData.nowPlayingSong.Artist ||
+					newNowPlayingSong.Track != stationData.nowPlayingSong.Track) {
+
+					this.scrobbleNowPlayingIfValid(stationData, null, station, users);
+					stationData.nowPlayingSong = {
+						Artist: newNowPlayingSong.Artist,
+						Track: newNowPlayingSong.Track,
+						StartTime: timestamp };
+				}
+				this.postNowPlayingIfValid(stationData, station, users);
+			}
 		};
 
 		scraper.fetchAndParse(cb, station.ScraperParam);
@@ -89,35 +104,40 @@ export class Scrobbler {
 		return stationData.lastUpdatedTime && (stationData.lastUpdatedTime - timestamp < LAST_UPDATE_TIMEOUT);
 	}
 
-	private scrobbleNowPlayingIfValid(stationData:ScrobblerStationData, station:stat.Station, users:usr.User[]) {
+	private scrobbleNowPlayingIfValid(stationData:ScrobblerStationData, songToScrobble:song.Song,
+		station:stat.Station, users:usr.User[]) {
+
+		if (!songToScrobble) {
+			songToScrobble = stationData.nowPlayingSong;
+
+			// If we are scrobbling the now playing song, check play time
+			if (!songToScrobble.StartTime || !stationData.lastUpdatedTime ||
+				stationData.lastUpdatedTime - songToScrobble.StartTime <= MIN_SCROBBLE_TIME) {
+				return;
+			}
+		}
+
 		// Check song details
-		if (!(stationData.nowPlayingSong && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track
-			&& stationData.nowPlayingSong.StartTime)) {
+		if (!(songToScrobble && songToScrobble.Artist && songToScrobble.Track)) {
 			return;
 		}
 
-		// Check play time
-		if (!(stationData.lastUpdatedTime
-			&& (stationData.lastUpdatedTime - stationData.nowPlayingSong.StartTime > MIN_SCROBBLE_TIME))) {
+		// Make sure it's not the same as the one we scrobbled last
+		if (songToScrobble != null && stationData.lastScrobbledSong != null
+			&& songToScrobble.Artist == stationData.lastScrobbledSong.Artist
+			&& songToScrobble.Track == stationData.lastScrobbledSong.Track) {
 			return;
 		}
 
-		// Make sure it's not the same as the one we scrobble last
-		if (stationData.nowPlayingSong != null && stationData.lastScrobbledSong != null
-			&& stationData.nowPlayingSong.Artist == stationData.lastScrobbledSong.Artist
-			&& stationData.nowPlayingSong.Track == stationData.lastScrobbledSong.Track) {
-			return;
-		}
-
-		stationData.lastScrobbledSong = stationData.nowPlayingSong;
+		stationData.lastScrobbledSong = songToScrobble;
 
 		if (station.Session) {
-			this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
+			this.lastFmDao.scrobble(songToScrobble, station.StationName, station.Session);
 		}
 
 		_.each(users, (user) => {
 			if (user) {
-				this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+				this.lastFmDao.scrobble(songToScrobble, user.UserName, user.Session);
 			}
 		});
 	}

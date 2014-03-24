@@ -1,4 +1,3 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -6,10 +5,9 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var scrap = require("./Scraper");
+var scrap = require("./CheerioScraper");
 
 
-var cheerio = require("cheerio");
 var winston = require("winston");
 
 var JjjScraper = (function (_super) {
@@ -18,17 +16,11 @@ var JjjScraper = (function (_super) {
         _super.call(this, name);
         this.baseUrl = baseUrl || "http://www.abc.net.au/triplej/feeds/playout/triplej_sydney_playout.xml";
     }
-    JjjScraper.prototype.fetchAndParse = function (callback) {
-        var _this = this;
-        this.fetchUrl(this.baseUrl, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parse(body, callback);
-        });
+    JjjScraper.prototype.getUrl = function () {
+        return this.baseUrl;
     };
 
-    JjjScraper.prototype.parse = function (body, callback) {
-        var $ = cheerio.load(body);
+    JjjScraper.prototype.parseCheerio = function ($, callback) {
         var nowPlayingItem = $.root().find('item').first();
         var playingTime = nowPlayingItem.find('playing');
 
@@ -42,16 +34,17 @@ var JjjScraper = (function (_super) {
 
                 if (artist && track) {
                     winston.info("JjjScraper found song " + artist + " - " + track);
-                    return callback(null, { Artist: artist, Track: track });
+                    callback(null, { Artist: artist, Track: track });
+                    return;
                 }
             }
         }
 
         winston.info("JjjScraper could not find song");
-        return callback(null, { Artist: null, Track: null });
+        callback(null, { Artist: null, Track: null });
     };
     return JjjScraper;
-})(scrap.Scraper);
+})(scrap.CheerioScraper);
 exports.JjjScraper = JjjScraper;
 
 //# sourceMappingURL=JjjScraper.js.map

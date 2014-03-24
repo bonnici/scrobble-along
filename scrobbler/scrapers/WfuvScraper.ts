@@ -15,17 +15,21 @@ export class WfuvScraper extends scrap.Scraper {
 		this.jsonName = jsonName;
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		this.fetchUrl(this.url, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseJson(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseJson(body, callback);
 		});
 	}
 
 	private parseJson(body: string, callback: (err, song:song.Song) => void): void {
 		if (!body || body.length < 14) {
 			winston.warn("WfuvScraper: No/invalid body", body);
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		body = body.trim().substring(12, body.length - 2);
@@ -35,17 +39,20 @@ export class WfuvScraper extends scrap.Scraper {
 		}
 		catch (e) {
 			winston.error("Could not parse JSON body", body);
-			return callback("Could not parse JSON body", null);
+			callback("Could not parse JSON body", null);
+			return;
 		}
 
 		if (!json || !json[this.jsonName]) {
 			winston.warn("WfuvScraper: Invalid JSON", json);
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		if (!json[this.jsonName].artist || !json[this.jsonName].title) {
 			winston.info("WfuvScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		var artist = json[this.jsonName].artist.trim();
@@ -53,11 +60,11 @@ export class WfuvScraper extends scrap.Scraper {
 
 		if (!artist || !title) {
 			winston.info("WfuvScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
 		}
 		else {
 			winston.info("WfuvScraper found song " + artist + " - " + title);
-			return callback(null, { Artist: artist, Track: title });
+			callback(null, { Artist: artist, Track: title });
 		}
 	}
 }

@@ -22,7 +22,7 @@ import nnm = require("./scrapers/NnmScraper");
 import jjj = require("./scrapers/JjjScraper");
 import soma = require("./scrapers/SomaScraper");
 import hollow = require("./scrapers/HollowEarthScraper");
-import theEnd = require("./scrapers/TheEndScraper");
+import theEnd = require("./scrapers/TheEndHtmlScraper");
 import c895 = require("./scrapers/C895Scraper");
 import kcrwEclectic24 = require("./scrapers/KcrwEclectic24Scraper");
 import kcqn = require("./scrapers/KcqnScraper");
@@ -38,11 +38,12 @@ import wzbc = require("./scrapers/WzbcScraper");
 import playFm = require("./scrapers/PlayFmScraper");
 import theCurrent = require("./scrapers/TheCurrentScraper");
 import lfmScraper = require("./scrapers/LastfmScraper");
+import lfmNoNowPlayingScraper = require("./scrapers/LastfmNoNowPlayingScraper");
 import infinita = require("./scrapers/InfinitaScraper");
 import mediaStream = require("./scrapers/MediaStreamScraper");
 import newtown = require("./scrapers/NewtownRadioScraper");
 import radio2Nl = require("./scrapers/Radio2NLScraper");
-import kloveAir1 = require("./scrapers/KLoveAir1Scraper");
+import kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -67,7 +68,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	SomaLush: new soma.SomaScraper("SomaLush", "lush"),
 	SomaUnderground80s: new soma.SomaScraper("SomaUnderground80s", "u80s"),
 	HollowEarth: new hollow.HollowEarthScraper("HollowEarth"),
-	TheEnd: new theEnd.TheEndScraper("TheEnd"),
+	TheEnd: new theEnd.TheEndHtmlScraper("TheEnd"),
 	C895: new c895.C895Scraper("C895"),
 	KCRWEclectic24: new kcrwEclectic24.KcrwEclectic24Scraper("KCRWEclectic24"),
 	KCQN: new kcqn.KcqnScraper("KCQN"),
@@ -86,7 +87,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	ABCJazz: new digMusic.DigMusicScraper("ABCJazz", "http://abcjazz.net.au/player-data.php"),
 	TheCurrent: new theCurrent.TheCurrentScraper("TheCurrent"),
 	LastFM: new lfmScraper.LastfmScraper("LastFM", LASTFM_API_KEY),
-	LastFMIgnoreListening: new lfmScraper.LastfmScraper("LastFM", LASTFM_API_KEY, true),
+	LastFMIgnoreListening: new lfmNoNowPlayingScraper.LastfmNoNowPlayingScraper("LastFM", LASTFM_API_KEY),
 	Infinita: new infinita.InfinitaScraper("Infinita"),
 	Oasis: new mediaStream.MediaStreamScraper("Oasis", "5124ed51ed596bde7d000016"),
 	Horizonte: new mediaStream.MediaStreamScraper("Horizonte", "5124f1b4ed596bde7d000017"),
@@ -99,7 +100,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 //////////////
 // Proper scrobbler
 //////////////
-
+/*
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
 	secret: LASTFM_SECRET,
@@ -137,6 +138,7 @@ mongodb.connect(MONGO_URI, (err, dbClient) => {
 	setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
 	scrapeAndScrobbleAllStations(stationDao, userDao);
 });
+*/
 
 
 //////////////
@@ -169,7 +171,6 @@ setInterval(
 //////////////
 // Scrobbler that scrapes but does not scrobble and uses fake stations & users
 //////////////
-/*
 var stations = [
 	{ StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
 	{ StationName: "NNM", ScraperName: "NNM", Session: "NNMSession" },
@@ -228,11 +229,12 @@ var stations = [
 	{ StationName: "KLove", ScraperName: "KLove", Session: "KLoveSession" }
 ];
 
-var usersListening = {
+var usersListening:{[index: string]:usr.User[]} = {
 	KEXP903FM: [{ UserName: "KEXPListener1", Session: "KEXPListener1Session" },
 				{ UserName: "KEXPListener2", Session: "KEXPListener2Session" }],
 	NNM: [{ UserName: "KEXPListener1", Session: "KEXPListener1Session" }],
 	triplejradio: [{ UserName: "JJJListener1", Session: "JJJListener1Session" }, null],
+	BBCRadio1: [{ UserName: "BBCListener1", Session: "BBCListener1Session" }],
 	TheEnd: null,
 	TheCurrent: []
 };
@@ -250,4 +252,3 @@ function testScrapeAndScrobble() {
 		}
 	});
 };
-*/

@@ -20,7 +20,7 @@ var MediaStreamScraper = (function (_super) {
         return this.url;
     };
 
-    MediaStreamScraper.prototype.extractSong = function (jsonData) {
+    MediaStreamScraper.prototype.extractNowPlayingSong = function (jsonData) {
         return {
             Artist: jsonData.data.artist.name,
             Track: jsonData.data.song.title

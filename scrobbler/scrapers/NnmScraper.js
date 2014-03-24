@@ -51,7 +51,8 @@ var NnmScraper = (function (_super) {
                 _this.tryParseJson(fullUrl2, function (err, jsonSong2) {
                     if (!err) {
                         winston.info("NnmScraper found song from JSON URL 2", jsonSong2);
-                        return callback(null, jsonSong2);
+                        callback(null, jsonSong2);
+                        return;
                     }
                     winston.info("NnmScraper could not find song");
                     callback(err, null);
@@ -69,59 +70,71 @@ var NnmScraper = (function (_super) {
     NnmScraper.prototype.tryParseJson = function (url, callback) {
         var _this = this;
         this.fetchUrl(url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseJson(body, callback);
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            _this.parseJson(body, callback);
         });
     };
 
     NnmScraper.prototype.parseJson = function (body, callback) {
         if (!body) {
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         try  {
             var json = JSON.parse(body);
         } catch (e) {
             winston.error("Could not parse JSON body", body);
-            return callback("Could not parse JSON body", null);
+            callback("Could not parse JSON body", null);
+            return;
         }
 
         if (json && json.artist && json.track) {
             if (this.artistFiltered(json.artist)) {
-                return callback(null, { Artist: null, Track: null });
+                callback(null, { Artist: null, Track: null });
+                return;
             } else {
-                return callback(null, { Artist: json.artist, Track: json.track });
+                callback(null, { Artist: json.artist, Track: json.track });
+                return;
             }
         } else {
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
     };
 
     NnmScraper.prototype.tryParseMarci = function (url, callback) {
         var _this = this;
         this.fetchUrl(url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseMarci(body, callback);
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            _this.parseMarci(body, callback);
         });
     };
 
     NnmScraper.prototype.parseMarci = function (body, callback) {
         if (!body) {
-            return callback("Blank marci", null);
+            callback("Blank marci", null);
+            return;
         }
 
         var $ = cheerio.load(body);
         var block1 = $('#block1').first();
         var letterbox1 = block1.children('#letterbox1').first();
         if (!letterbox1 || letterbox1.length == 0) {
-            return callback("Could not parse marci", null);
+            callback("Could not parse marci", null);
+            return;
         }
 
         var onAir = block1.children('.on-air');
         if (!onAir || onAir.length == 0) {
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         if (letterbox1) {
@@ -130,14 +143,17 @@ var NnmScraper = (function (_super) {
 
             if (artist && track) {
                 if (this.artistFiltered(artist)) {
-                    return callback(null, { Artist: null, Track: null });
+                    callback(null, { Artist: null, Track: null });
+                    return;
                 } else {
-                    return callback(null, { Artist: artist, Track: track });
+                    callback(null, { Artist: artist, Track: track });
+                    return;
                 }
             }
         }
 
-        return callback("Could not parse marci", null);
+        callback("Could not parse marci", null);
+        return;
     };
 
     NnmScraper.prototype.artistFiltered = function (artist) {

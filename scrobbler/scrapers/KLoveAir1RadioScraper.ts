@@ -13,7 +13,7 @@ export class KLoveAir1RadioScraper extends scrap.Scraper {
 		this.url = "http://cdn.kloveair1.com/services/broadcast.asmx/GetRecentSongs?SiteId=" + id + "&format=xml";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		this.fetchUrl(this.url, (err, body) => {
 			if (err) {
 				callback(err, null);

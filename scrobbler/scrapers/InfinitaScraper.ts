@@ -1,10 +1,8 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 
 import scrap = require("Scraper");
 import song = require("../Song");
 
-import cheerio = require("cheerio");
 import winston = require("winston");
 
 export class InfinitaScraper extends scrap.Scraper {
@@ -15,10 +13,13 @@ export class InfinitaScraper extends scrap.Scraper {
 		this.url = "http://www.infinita.cl/datas/ahora.xml";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		this.fetchUrl(this.url, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseHtml(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseHtml(body, callback);
 		});
 	}
 

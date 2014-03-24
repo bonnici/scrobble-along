@@ -1,4 +1,3 @@
-/// <reference path="../../definitions/dummy-definitions/cheerio.d.ts"/>
 /// <reference path="../../definitions/typescript-node-definitions/winston.d.ts"/>
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -7,7 +6,6 @@ var __extends = this.__extends || function (d, b) {
     d.prototype = new __();
 };
 var scrap = require("./Scraper");
-
 
 
 var winston = require("winston");
@@ -21,9 +19,11 @@ var InfinitaScraper = (function (_super) {
     InfinitaScraper.prototype.fetchAndParse = function (callback) {
         var _this = this;
         this.fetchUrl(this.url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseHtml(body, callback);
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            _this.parseHtml(body, callback);
         });
     };
 

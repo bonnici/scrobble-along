@@ -6,40 +6,28 @@ var __extends = this.__extends || function (d, b) {
     __.prototype = b.prototype;
     d.prototype = new __();
 };
-var scrap = require("./Scraper");
+var scrap = require("./CheerioScraper");
 
 
-var cheerio = require("cheerio");
+
 var winston = require("winston");
 
 var TheCurrentScraper = (function (_super) {
     __extends(TheCurrentScraper, _super);
     function TheCurrentScraper(name) {
         _super.call(this, name);
-        this.url = "http://www.thecurrent.org/playlist";
     }
-    TheCurrentScraper.prototype.fetchAndParse = function (callback) {
-        var _this = this;
-        this.fetchUrl(this.url, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseHtml(body, callback);
-        });
+    TheCurrentScraper.prototype.getUrl = function () {
+        return "http://www.thecurrent.org/playlist";
     };
 
-    TheCurrentScraper.prototype.parseHtml = function (body, callback) {
-        if (!body) {
-            winston.warn("TheCurrentScraper: No HTML body");
-            return callback(null, { Artist: null, Track: null });
-        }
-
-        var $ = cheerio.load(body);
-
+    TheCurrentScraper.prototype.parseCheerio = function ($, callback) {
         var playlistRows = $('li#playlist li div.songDetails');
 
         if (playlistRows.length < 1) {
             winston.info("TheCurrentScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         var artist = playlistRows.first().find('h5.artist').text();
@@ -47,7 +35,8 @@ var TheCurrentScraper = (function (_super) {
 
         if (!artist || !song) {
             winston.info("TheCurrentScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         artist = artist.trim();
@@ -55,14 +44,14 @@ var TheCurrentScraper = (function (_super) {
 
         if (!artist || !song) {
             winston.info("TheCurrentScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
         } else {
             winston.info("TheCurrentScraper found song " + artist + " - " + song);
-            return callback(null, { Artist: artist, Track: song });
+            callback(null, { Artist: artist, Track: song });
         }
     };
     return TheCurrentScraper;
-})(scrap.Scraper);
+})(scrap.CheerioScraper);
 exports.TheCurrentScraper = TheCurrentScraper;
 
 //# sourceMappingURL=TheCurrentScraper.js.map

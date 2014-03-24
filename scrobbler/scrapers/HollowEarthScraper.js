@@ -20,9 +20,11 @@ var HollowEarthScraper = (function (_super) {
         var _this = this;
         var timestampedUrl = this.url + "?_=" + new Date().getTime();
         this.fetchUrl(timestampedUrl, function (err, body) {
-            if (err)
-                return callback(err, null);
-            return _this.parseHtml(body, callback);
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            _this.parseHtml(body, callback);
         });
     };
 

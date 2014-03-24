@@ -52,24 +52,37 @@ var Scrobbler = (function () {
             this.stationData[scraperName] = stationData;
         }
 
-        var cb = function (err, newSong) {
+        var cb = function (err, newNowPlayingSong, justScrobbledSong) {
             if (err) {
                 winston.error("Error scraping " + scraperName + ": " + err);
                 if (_this.lastUpdatedTooLongAgo(stationData, timestamp)) {
-                    _this.scrobbleNowPlayingIfValid(stationData, station, users);
+                    _this.scrobbleNowPlayingIfValid(stationData, null, station, users);
                     stationData.nowPlayingSong = { Artist: null, Track: null, StartTime: timestamp };
                     stationData.lastUpdatedTime = null;
                 }
                 return;
             }
 
+            if (justScrobbledSong && newNowPlayingSong) {
+                winston.error("Only one of newNowPlayingSong and justScrobbledSong should be set");
+                return;
+            }
+
             stationData.lastUpdatedTime = timestamp;
 
-            if (!newSong || !stationData.nowPlayingSong || newSong.Artist != stationData.nowPlayingSong.Artist || newSong.Track != stationData.nowPlayingSong.Track) {
-                _this.scrobbleNowPlayingIfValid(stationData, station, users);
-                stationData.nowPlayingSong = { Artist: newSong.Artist, Track: newSong.Track, StartTime: timestamp };
+            if (justScrobbledSong) {
+                _this.scrobbleNowPlayingIfValid(stationData, justScrobbledSong, station, users);
+            } else {
+                if (!newNowPlayingSong || !stationData.nowPlayingSong || newNowPlayingSong.Artist != stationData.nowPlayingSong.Artist || newNowPlayingSong.Track != stationData.nowPlayingSong.Track) {
+                    _this.scrobbleNowPlayingIfValid(stationData, null, station, users);
+                    stationData.nowPlayingSong = {
+                        Artist: newNowPlayingSong.Artist,
+                        Track: newNowPlayingSong.Track,
+                        StartTime: timestamp
+                    };
+                }
+                _this.postNowPlayingIfValid(stationData, station, users);
             }
-            _this.postNowPlayingIfValid(stationData, station, users);
         };
 
         scraper.fetchAndParse(cb, station.ScraperParam);
@@ -79,29 +92,33 @@ var Scrobbler = (function () {
         return stationData.lastUpdatedTime && (stationData.lastUpdatedTime - timestamp < LAST_UPDATE_TIMEOUT);
     };
 
-    Scrobbler.prototype.scrobbleNowPlayingIfValid = function (stationData, station, users) {
+    Scrobbler.prototype.scrobbleNowPlayingIfValid = function (stationData, songToScrobble, station, users) {
         var _this = this;
-        if (!(stationData.nowPlayingSong && stationData.nowPlayingSong.Artist && stationData.nowPlayingSong.Track && stationData.nowPlayingSong.StartTime)) {
+        if (!songToScrobble) {
+            songToScrobble = stationData.nowPlayingSong;
+
+            if (!songToScrobble.StartTime || !stationData.lastUpdatedTime || stationData.lastUpdatedTime - songToScrobble.StartTime <= MIN_SCROBBLE_TIME) {
+                return;
+            }
+        }
+
+        if (!(songToScrobble && songToScrobble.Artist && songToScrobble.Track)) {
             return;
         }
 
-        if (!(stationData.lastUpdatedTime && (stationData.lastUpdatedTime - stationData.nowPlayingSong.StartTime > MIN_SCROBBLE_TIME))) {
+        if (songToScrobble != null && stationData.lastScrobbledSong != null && songToScrobble.Artist == stationData.lastScrobbledSong.Artist && songToScrobble.Track == stationData.lastScrobbledSong.Track) {
             return;
         }
 
-        if (stationData.nowPlayingSong != null && stationData.lastScrobbledSong != null && stationData.nowPlayingSong.Artist == stationData.lastScrobbledSong.Artist && stationData.nowPlayingSong.Track == stationData.lastScrobbledSong.Track) {
-            return;
-        }
-
-        stationData.lastScrobbledSong = stationData.nowPlayingSong;
+        stationData.lastScrobbledSong = songToScrobble;
 
         if (station.Session) {
-            this.lastFmDao.scrobble(stationData.nowPlayingSong, station.StationName, station.Session);
+            this.lastFmDao.scrobble(songToScrobble, station.StationName, station.Session);
         }
 
         _.each(users, function (user) {
             if (user) {
-                _this.lastFmDao.scrobble(stationData.nowPlayingSong, user.UserName, user.Session);
+                _this.lastFmDao.scrobble(songToScrobble, user.UserName, user.Session);
             }
         });
     };

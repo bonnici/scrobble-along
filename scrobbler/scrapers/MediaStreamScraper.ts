@@ -6,6 +6,7 @@ import jsonScrap = require("JsonScraper");
 import winston = require("winston");
 
 export class MediaStreamScraper extends jsonScrap.JsonScraper {
+	private url:string;
 
 	constructor(name:string, id:string) {
 		super(name);
@@ -16,7 +17,7 @@ export class MediaStreamScraper extends jsonScrap.JsonScraper {
 		return this.url;
 	}
 
-	extractSong(jsonData:any): song.Song {
+	extractNowPlayingSong(jsonData:any): song.Song {
 		return {
 			Artist: jsonData.data.artist.name,
 			Track: jsonData.data.song.title

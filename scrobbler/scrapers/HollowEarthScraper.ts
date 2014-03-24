@@ -13,11 +13,14 @@ export class HollowEarthScraper extends scrap.Scraper {
 		this.url = "http://www.boontdusties.com/specialhollow/yql.php";
 	}
 
-	public fetchAndParse(callback: (err, song:song.Song) => void): void {
+	public fetchAndParse(callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
 		var timestampedUrl = this.url + "?_=" + new Date().getTime();
 		this.fetchUrl(timestampedUrl, (err, body) => {
-			if (err) return callback(err, null);
-			return this.parseHtml(body, callback);
+			if (err) {
+				callback(err, null);
+				return;
+			}
+			this.parseHtml(body, callback);
 		});
 	}
 
