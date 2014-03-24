@@ -15,13 +15,13 @@ var LAST_UPDATE_TIMEOUT = 60 * 1000; // Amount of time failures can occur before
 var MIN_SCROBBLE_TIME = 35 * 1000; // The minimum time a song has to play before it can be scrobbled
 
 class ScrobblerStationData {
-	public scraperName: string;
+	public stationName: string;
 	public nowPlayingSong: song.Song;
 	public lastScrobbledSong: song.Song;
 	public lastUpdatedTime: number;
 
-	constructor(scraperName: string) {
-		this.scraperName = scraperName,
+	constructor(stationName: string) {
+		this.stationName = stationName,
 		this.nowPlayingSong = { Artist: null, Track: null };
 		this.lastScrobbledSong = null;
 		this.lastUpdatedTime = null;
@@ -45,24 +45,24 @@ export class Scrobbler {
 			return;
 		}
 
-		if (!station) {
+		if (!station || !station.StationName) {
 			winston.error("Attempted to process invalid station:", station);
 			return;
 		}
 
-		var scraperName = scraper.name;
+		var stationName = station.StationName;
 
-		var stationData = this.stationData[scraperName];
+		var stationData = this.stationData[stationName];
 
 		if (!stationData) {
-			winston.info("New scraper found, initializing:", scraperName);
-			stationData = new ScrobblerStationData(scraperName);
-			this.stationData[scraperName] = stationData;
+			winston.info("New station found, initializing:", stationName);
+			stationData = new ScrobblerStationData(stationName);
+			this.stationData[stationName] = stationData;
 		}
 
 		var cb = (err, newNowPlayingSong:song.Song, justScrobbledSong?:song.Song) => {
 			if (err) {
-				winston.error("Error scraping " + scraperName + ": " + err);
+				winston.error("Error scraping " + stationName + ": " + err);
 				if (this.lastUpdatedTooLongAgo(stationData, timestamp)) {
 					this.scrobbleNowPlayingIfValid(stationData, null, station, users);
 					stationData.nowPlayingSong = { Artist: null, Track: null, StartTime: timestamp };
@@ -80,6 +80,7 @@ export class Scrobbler {
 
 			// justScrobbledSong should be set if the scraper can't figure out what is currently playing
 			if (justScrobbledSong) {
+				justScrobbledSong.StartTime = new Date().getTime();
 				this.scrobbleNowPlayingIfValid(stationData, justScrobbledSong, station, users);
 			}
 			else {
@@ -122,6 +123,11 @@ export class Scrobbler {
 			return;
 		}
 
+		if (stationData.stationName == "LastFMIgnoreListening" && users.length > 0) {
+			winston.warn("songToScrobble:", songToScrobble);
+			winston.warn("stationData.lastScrobbledSong:", stationData.lastScrobbledSong);
+		}
+
 		// Make sure it's not the same as the one we scrobbled last
 		if (songToScrobble != null && stationData.lastScrobbledSong != null
 			&& songToScrobble.Artist == stationData.lastScrobbledSong.Artist
@@ -129,7 +135,7 @@ export class Scrobbler {
 			return;
 		}
 
-		stationData.lastScrobbledSong = songToScrobble;
+		stationData.lastScrobbledSong = { Artist: songToScrobble.Artist, Track: songToScrobble.Track };
 
 		if (station.Session) {
 			this.lastFmDao.scrobble(songToScrobble, station.StationName, station.Session);

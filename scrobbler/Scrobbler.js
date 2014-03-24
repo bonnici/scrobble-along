@@ -14,8 +14,8 @@ var LAST_UPDATE_TIMEOUT = 60 * 1000;
 var MIN_SCROBBLE_TIME = 35 * 1000;
 
 var ScrobblerStationData = (function () {
-    function ScrobblerStationData(scraperName) {
-        this.scraperName = scraperName, this.nowPlayingSong = { Artist: null, Track: null };
+    function ScrobblerStationData(stationName) {
+        this.stationName = stationName, this.nowPlayingSong = { Artist: null, Track: null };
         this.lastScrobbledSong = null;
         this.lastUpdatedTime = null;
     }
@@ -37,24 +37,24 @@ var Scrobbler = (function () {
             return;
         }
 
-        if (!station) {
+        if (!station || !station.StationName) {
             winston.error("Attempted to process invalid station:", station);
             return;
         }
 
-        var scraperName = scraper.name;
+        var stationName = station.StationName;
 
-        var stationData = this.stationData[scraperName];
+        var stationData = this.stationData[stationName];
 
         if (!stationData) {
-            winston.info("New scraper found, initializing:", scraperName);
-            stationData = new ScrobblerStationData(scraperName);
-            this.stationData[scraperName] = stationData;
+            winston.info("New station found, initializing:", stationName);
+            stationData = new ScrobblerStationData(stationName);
+            this.stationData[stationName] = stationData;
         }
 
         var cb = function (err, newNowPlayingSong, justScrobbledSong) {
             if (err) {
-                winston.error("Error scraping " + scraperName + ": " + err);
+                winston.error("Error scraping " + stationName + ": " + err);
                 if (_this.lastUpdatedTooLongAgo(stationData, timestamp)) {
                     _this.scrobbleNowPlayingIfValid(stationData, null, station, users);
                     stationData.nowPlayingSong = { Artist: null, Track: null, StartTime: timestamp };
@@ -71,6 +71,7 @@ var Scrobbler = (function () {
             stationData.lastUpdatedTime = timestamp;
 
             if (justScrobbledSong) {
+                justScrobbledSong.StartTime = new Date().getTime();
                 _this.scrobbleNowPlayingIfValid(stationData, justScrobbledSong, station, users);
             } else {
                 if (!newNowPlayingSong || !stationData.nowPlayingSong || newNowPlayingSong.Artist != stationData.nowPlayingSong.Artist || newNowPlayingSong.Track != stationData.nowPlayingSong.Track) {
@@ -106,11 +107,16 @@ var Scrobbler = (function () {
             return;
         }
 
+        if (stationData.stationName == "LastFMIgnoreListening" && users.length > 0) {
+            winston.warn("songToScrobble:", songToScrobble);
+            winston.warn("stationData.lastScrobbledSong:", stationData.lastScrobbledSong);
+        }
+
         if (songToScrobble != null && stationData.lastScrobbledSong != null && songToScrobble.Artist == stationData.lastScrobbledSong.Artist && songToScrobble.Track == stationData.lastScrobbledSong.Track) {
             return;
         }
 
-        stationData.lastScrobbledSong = songToScrobble;
+        stationData.lastScrobbledSong = { Artist: songToScrobble.Artist, Track: songToScrobble.Track };
 
         if (station.Session) {
             this.lastFmDao.scrobble(songToScrobble, station.StationName, station.Session);

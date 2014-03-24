@@ -15,8 +15,9 @@ var LastfmNoNowPlayingScraper = (function (_super) {
     function LastfmNoNowPlayingScraper(name, apiKey) {
         _super.call(this, name);
         this.apiKey = apiKey;
-        // Only return songs as just played if they were scrobbled less than a minute ago
-        this.MAX_SCROBBLED_TIME = 120 * 1000;
+        // Only return songs as just played if they were scrobbled less than 5 minutes ago
+        // The scrobbler will only scrobble once since it doesn't scrobble the same song twice in a row
+        this.MAX_SCROBBLED_TIME = 5 * 60 * 1000;
     }
     LastfmNoNowPlayingScraper.prototype.getUrl = function (lastfmUsername) {
         if (!lastfmUsername) {

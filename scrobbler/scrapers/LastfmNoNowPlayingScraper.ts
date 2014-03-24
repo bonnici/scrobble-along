@@ -6,8 +6,9 @@ import jsonScrap = require("JsonScraper");
 import winston = require("winston");
 
 export class LastfmNoNowPlayingScraper extends jsonScrap.JsonScraper {
-	// Only return songs as just played if they were scrobbled less than a minute ago
-	private MAX_SCROBBLED_TIME:number = 120*1000;
+	// Only return songs as just played if they were scrobbled less than 5 minutes ago
+	// The scrobbler will only scrobble once since it doesn't scrobble the same song twice in a row
+	private MAX_SCROBBLED_TIME:number = 5*60*1000;
 
 	constructor(name:string, private apiKey:string) {
 		super(name);
