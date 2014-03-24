@@ -8,7 +8,7 @@ var __extends = this.__extends || function (d, b) {
 
 var jsonScrap = require("./JsonScraper");
 
-var winston = require("winston");
+
 
 var LastfmNoNowPlayingScraper = (function (_super) {
     __extends(LastfmNoNowPlayingScraper, _super);
@@ -35,8 +35,6 @@ var LastfmNoNowPlayingScraper = (function (_super) {
 
         var scrobbledTime = parseInt(track['date']['uts']) * 1000;
         var timeNow = new Date().getTime();
-
-        winston.info("times:", { scrobbledTime: scrobbledTime });
 
         if (scrobbledTime && timeNow && (timeNow - scrobbledTime < this.MAX_SCROBBLED_TIME)) {
             return { Artist: track['artist']['#text'], Track: track['name'] };

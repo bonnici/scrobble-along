@@ -87,7 +87,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	ABCJazz: new digMusic.DigMusicScraper("ABCJazz", "http://abcjazz.net.au/player-data.php"),
 	TheCurrent: new theCurrent.TheCurrentScraper("TheCurrent"),
 	LastFM: new lfmScraper.LastfmScraper("LastFM", LASTFM_API_KEY),
-	LastFMIgnoreListening: new lfmNoNowPlayingScraper.LastfmNoNowPlayingScraper("LastFM", LASTFM_API_KEY),
+	LastFMIgnoreListening: new lfmNoNowPlayingScraper.LastfmNoNowPlayingScraper("LastFMIgnoreListening", LASTFM_API_KEY),
 	Infinita: new infinita.InfinitaScraper("Infinita"),
 	Oasis: new mediaStream.MediaStreamScraper("Oasis", "5124ed51ed596bde7d000016"),
 	Horizonte: new mediaStream.MediaStreamScraper("Horizonte", "5124f1b4ed596bde7d000017"),
@@ -100,7 +100,6 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 //////////////
 // Proper scrobbler
 //////////////
-/*
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
 	secret: LASTFM_SECRET,
@@ -117,6 +116,11 @@ function scrapeAndScrobbleAllStations(stationDao, userDao) {
 
 		_.each(stations, (station:stat.Station) => {
 			if (!station) return; // break
+
+			if (station.Disabled) {
+				winston.info("Station " + station.StationName + " is disabled and was skipped");
+				return; // break
+			}
 
 			userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
 				if (err) return; // break
@@ -138,7 +142,6 @@ mongodb.connect(MONGO_URI, (err, dbClient) => {
 	setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
 	scrapeAndScrobbleAllStations(stationDao, userDao);
 });
-*/
 
 
 //////////////
@@ -171,6 +174,7 @@ setInterval(
 //////////////
 // Scrobbler that scrapes but does not scrobble and uses fake stations & users
 //////////////
+/*
 var stations = [
 	{ StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
 	{ StationName: "NNM", ScraperName: "NNM", Session: "NNMSession" },
@@ -252,3 +256,4 @@ function testScrapeAndScrobble() {
 		}
 	});
 };
+*/

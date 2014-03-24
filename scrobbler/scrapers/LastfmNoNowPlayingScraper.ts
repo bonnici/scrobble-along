@@ -32,8 +32,6 @@ export class LastfmNoNowPlayingScraper extends jsonScrap.JsonScraper {
 		var scrobbledTime = parseInt(track['date']['uts']) * 1000;
 		var timeNow = new Date().getTime();
 
-		winston.info("times:", {scrobbledTime:scrobbledTime})
-
 		if (scrobbledTime && timeNow && (timeNow - scrobbledTime < this.MAX_SCROBBLED_TIME)) {
 			return { Artist: track['artist']['#text'], Track: track['name'] };
 		}

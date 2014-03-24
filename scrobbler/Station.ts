@@ -3,4 +3,5 @@ export interface Station {
 	ScraperName: string;
 	ScraperParam?: string;
 	Session: string;
+	Disabled?: boolean;
 }
