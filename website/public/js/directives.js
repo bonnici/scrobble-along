@@ -2,7 +2,7 @@
 
 /* Directives */
 
-angular.module('myApp.directives', []).
+angular.module('scrobbleAlong.directives', []).
 	directive('appVersion', function (version) {
 		return function(scope, elm, attrs) {
 			elm.text(version);
