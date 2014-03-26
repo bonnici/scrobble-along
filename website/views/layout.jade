@@ -1,9 +1,20 @@
-!!!
-html(ng-app="scrobbleAlong")
+doctype html
+html(lang="en", data-ng-app="scrobbleAlong")
 	head
 		meta(charset='utf8')
 		base(href='/')
 		title Angular Express Seed App
 		link(rel='stylesheet', href='/css/app.css')
 	body
+		div(data-ng-controller='MenuCtrl')
+			p this is the menu
+				p(data-ng-if='loggedIn') You are logged in
+				p(data-ng-bind='loggedIn')
 		block body
+
+		script(src='js/lib/angular/angular.js')
+		script(src='js/app.js')
+		script(src='js/services.js')
+		script(src='js/controllers.js')
+		script(src='js/filters.js')
+		script(src='js/directives.js')

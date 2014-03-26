@@ -1,27 +1,31 @@
+var express = require('express');
+var http = require('http');
+var path = require('path');
+var winston = require('winston');
 
-/**
- * Module dependencies
- */
+var pages = require('./routes/pages');
+var api = require('./routes/api');
 
-var express = require('express'),
-	routes = require('./routes'),
-	api = require('./routes/api'),
-	http = require('http'),
-	path = require('path');
+// Required environment variables
+var PORT = process.env.PORT;
+var NODE_ENV = process.env.NODE_ENV;
 
-var app = module.exports = express();
+if (!PORT || !NODE_ENV) {
+	winston.error("A required environment variable is missing:", process.env);
+	process.exit(1);
+}
 
+var app = express();
 
-/**
- * Configuration
- */
+// Configuration
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(express.logger('dev'));
-app.use(express.bodyParser());
+app.use(express.logger('dev')); //todo remove dev?
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
@@ -37,24 +41,20 @@ if (app.get('env') === 'production') {
 }
 
 
-/**
- * Routes
- */
+// Routes
 
-// serve index and view partials
-app.get('/', routes.index);
+app.get('/', pages.index);
+app.get('/admin', pages.admin);
 
 // JSON API
 app.get('/api/name', api.name);
 
 // redirect all others to the index (HTML5 history)
-app.get('*', routes.index);
+app.get('*', pages.index);
 
 
-/**
- * Start Server
- */
+// Start Server
 
 http.createServer(app).listen(app.get('port'), function () {
-	console.log('Express server listening on port ' + app.get('port'));
+	winston.info('Express server listening on port ' + app.get('port'));
 });

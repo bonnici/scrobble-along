@@ -3,21 +3,25 @@
 /* Controllers */
 
 angular.module('scrobbleAlong.controllers', []).
-	controller('AppCtrl', function ($scope, $http) {
+
+	controller('MenuCtrl', function ($scope) {
+		$scope.loggedIn = false;
+	}).
+
+	controller('IndexCtrl', function ($scope, $http) {
 		$http({
 			method: 'GET',
 			url: '/api/name'
 		}).
-		success(function (data, status, headers, config) {
-			$scope.name = data.name;
-		}).
-		error(function (data, status, headers, config) {
-			$scope.name = 'Error!';
-		});
+			success(function (data, status, headers, config) {
+				$scope.name = data.name;
+			}).
+			error(function (data, status, headers, config) {
+				$scope.name = 'Error!';
+			});
 	}).
-	controller('MyCtrl1', function ($scope) {
+
+	controller('AdminCtrl', function ($scope) {
 		// write Ctrl here
-	}).
-	controller('MyCtrl2', function ($scope) {
-		// write Ctrl here
+		$scope.adminName = "Admin Bob";
 	});

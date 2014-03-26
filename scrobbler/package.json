@@ -1,5 +1,5 @@
 {
-  "name": "scrobble-along-scraper"
+    "name": "scrobble-along-scraper"
   , "version": "0.0.1"
   , "private": true
   , "dependencies": {
