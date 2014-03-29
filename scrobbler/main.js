@@ -7,7 +7,7 @@ var lastfm = require("lastfm");
 var mongodb = require("mongodb");
 var winston = require("winston");
 
-var crypt = require("./Crypter");
+var crypt = require("./common/Crypter");
 
 var scrob = require("./Scrobbler");
 

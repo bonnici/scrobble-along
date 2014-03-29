@@ -123,8 +123,8 @@ describe('LastfmScraper', function () {
             }, "Timeout", 5000);
         });
 
-        it('should not return a just played song if its hasnt been played in the last minute', function () {
-            var timestamp = "" + Math.floor((new Date().getTime() / 1000) - 61);
+        it('should not return a just played song if its hasnt been played in the last 5 minutes', function () {
+            var timestamp = "" + Math.floor((new Date().getTime() / 1000) - (5 * 60 + 1));
             var jsonString = '{\
 				  "recenttracks": {\
 					"track": [\

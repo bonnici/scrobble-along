@@ -2,7 +2,7 @@
 /// <reference path="../definitions/DefinitelyTyped/underscore/underscore.d.ts"/>
 /// <reference path="../definitions/typescript-node-definitions/winston.d.ts"/>
 
-import crypt = require("./Crypter");
+import crypt = require("./common/Crypter");
 import u = require("./User");
 
 import _ = require("underscore");

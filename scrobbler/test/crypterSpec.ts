@@ -1,6 +1,6 @@
 /// <reference path="../../definitions/DefinitelyTyped/jasmine/jasmine.d.ts"/>
 
-import c = require("../Crypter");
+import c = require("../common/Crypter");
 
 describe("CrypterImpl", () => {
 	describe("encrypt & decrypt", () => {

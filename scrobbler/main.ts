@@ -8,7 +8,7 @@ import lastfm = require("lastfm");
 import mongodb = require("mongodb");
 import winston = require("winston");
 
-import crypt = require("./Crypter");
+import crypt = require("./common/Crypter");
 import scrap = require("./scrapers/Scraper");
 import scrob = require("./Scrobbler");
 import stat = require("./Station");
