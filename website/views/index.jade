@@ -2,8 +2,57 @@ extends layout
 
 block body
 	div(data-ng-controller='IndexCtrl')
-		h2 Hello {{name}}
+		div(data-ng-if='loggedIn')
+			p Logged in as {{lastfmUsername}}
+				img(data-ng-src='{{lastfmProfileImage}}')
+			p Scrobbling along with:
+				ul
+					li {{listeningTo}}
+						a(href='{{stations[listeningTo].stationUrl}}')  Station
+						a(href='{{stations[listeningTo].streamUrl}}')  Stream
+					li {{userScrobbles[listeningTo]}}
+					li
+						img(data-ng-src='{{stations[listeningTo].lastfmProfileImage}}')
+					li
+						ul
+							li(data-ng-repeat='track in stations[listeningTo].recentTracks')
+								a(href='{{track.url}}') {{track.artist}} - {{track.name}}
+								span(data-ng-if='track.nowPlaying')  (now playing)
+								img(data-ng-src='{{track.image}}')
+			a(href='/logout') Logout
 
-		div
-			| Angular seed app: v
-			span(data-app-version)
+		div(data-ng-if='!loggedIn')
+			h3 Scrobble Along with the radio
+			p.
+				Have you ever been listening to a radio station and wished there was a way to scrobble those songs?
+				Now you can! Log in with your Last.fm account and select a station below, and you will scrobble what
+				they play. For more information about how this works and how to get in touch, check out the about page.
+			a(href='{{loginUrl}}') Login
+
+		p Sort by:
+			ul
+				li
+					a(href='', data-ng-click='sortStationsBy = "lastfmUsername"') Name
+					span(data-ng-if='sortStationsBy == "lastfmUsername"')  (selected)
+				li
+					a(href='', data-ng-click='sortStationsBy = "scrobbles"') Scrobbles
+					span(data-ng-if='sortStationsBy == "scrobbles"')  (selected)
+				li
+					a(href='', data-ng-click='sortStationsBy = "compatibility"') Compatibility
+					span(data-ng-if='sortStationsBy == "compatibility"')  (selected)
+
+		div(data-ng-repeat='station in stations | filter:notListening | orderBy:sortStations')
+			ul
+				li {{station.lastfmUsername}}
+					a(href='{{station.stationUrl}}')  Station
+					a(href='{{station.streamUrl}}')  Stream
+				li {{userScrobbles[station.lastfmUsername]}}
+				li
+					img(data-ng-src='{{station.lastfmProfileImage}}')
+				li {{station.tasteometer}}
+				li
+					ul
+						li(data-ng-repeat='track in station.recentTracks')
+							a(href='{{track.url}}') {{track.artist}} - {{track.name}}
+							span(data-ng-if='track.nowPlaying')  (now playing)
+							img(data-ng-src='{{track.image}}')

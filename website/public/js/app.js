@@ -6,7 +6,8 @@ angular.module('scrobbleAlong', [
 	'scrobbleAlong.controllers',
 	'scrobbleAlong.filters',
 	'scrobbleAlong.services',
-	'scrobbleAlong.directives'
+	'scrobbleAlong.directives',
+	'ngCookies'
 ]).
 config(function ($locationProvider) {
 	//todo is this needed?
