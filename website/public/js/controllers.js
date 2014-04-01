@@ -142,6 +142,14 @@ angular.module('scrobbleAlong.controllers', []).
 						success(function(stations, status, headers, config) {
 							//todo if status == 404 ...
 							$scope.stations = stations;
+
+							angular.forEach(stations, function(station) {
+								station.userScrobbles = $scope.userScrobbles[station.lastfmUsername];
+								if (station.lastfmUsername == $scope.listeningTo) {
+									$scope.scrobblingStation = station;
+								}
+							});
+
 							updateStationLastfmInfo();
 							updateStationLastfmRecentTracks();
 						}).

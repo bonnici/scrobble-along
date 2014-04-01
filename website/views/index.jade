@@ -3,23 +3,8 @@ extends layout
 block body
 	div(data-ng-controller='IndexCtrl')
 		div(data-ng-if='loggedIn')
-			p Logged in as {{lastfmUsername}}
-				img(data-ng-src='{{lastfmProfileImage}}')
-			p Scrobbling along with:
-				ul
-					li {{listeningTo}}
-						a(href='{{stations[listeningTo].stationUrl}}')  Station
-						a(href='{{stations[listeningTo].streamUrl}}')  Stream
-					li {{userScrobbles[listeningTo]}}
-					li
-						img(data-ng-src='{{stations[listeningTo].lastfmProfileImage}}')
-					li
-						ul
-							li(data-ng-repeat='track in stations[listeningTo].recentTracks')
-								a(href='{{track.url}}') {{track.artist}} - {{track.name}}
-								span(data-ng-if='track.nowPlaying')  (now playing)
-								img(data-ng-src='{{track.image}}')
-			a(href='/logout') Logout
+			div(user-tile)
+			div(data-ng-if='scrobblingStation', station-tile, station='scrobblingStation')
 
 		div(data-ng-if='!loggedIn')
 			h3 Scrobble Along with the radio
@@ -41,18 +26,4 @@ block body
 					a(href='', data-ng-click='sortStationsBy = "compatibility"') Compatibility
 					span(data-ng-if='sortStationsBy == "compatibility"')  (selected)
 
-		div(data-ng-repeat='station in stations | filter:notListening | orderBy:sortStations')
-			ul
-				li {{station.lastfmUsername}}
-					a(href='{{station.stationUrl}}')  Station
-					a(href='{{station.streamUrl}}')  Stream
-				li {{userScrobbles[station.lastfmUsername]}}
-				li
-					img(data-ng-src='{{station.lastfmProfileImage}}')
-				li {{station.tasteometer}}
-				li
-					ul
-						li(data-ng-repeat='track in station.recentTracks')
-							a(href='{{track.url}}') {{track.artist}} - {{track.name}}
-							span(data-ng-if='track.nowPlaying')  (now playing)
-							img(data-ng-src='{{track.image}}')
+		div(data-ng-repeat='station in stations | filter:notListening | orderBy:sortStations', station-tile, station='station')

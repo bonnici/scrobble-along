@@ -1,0 +1,15 @@
+<ul>
+	<li>{{station.lastfmUsername}} <a href="{{station.stationUrl}}">Station</a> <a href="{{station.streamUrl}}">Stream</a></li>
+	<li>{{station.userScrobbles}}</li>
+	<li>{{station.tasteometer}}</li>
+	<li><img data-ng-src="{{station.lastfmProfileImage}}"></li>
+	<li>
+		<ul>
+			<li data-ng-repeat="track in station.recentTracks">
+				<a href="{{track.url}}">{{track.artist}} - {{track.name}}</a>
+				<span data-ng-if="track.nowPlaying">(now playing)</span>
+				<img data-ng-src="{{track.image}}">
+			</li>
+		</ul>
+	</li>
+</ul>
