@@ -14,7 +14,7 @@ block body
 				they play. For more information about how this works and how to get in touch, check out the about page.
 			a(href='{{loginUrl}}') Login
 
-		p Sort by:
+		p(data-ng-if='loggedIn') Sort by:
 			ul
 				li
 					a(href='', data-ng-click='sortStationsBy = "lastfmUsername"') Name

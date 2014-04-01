@@ -112,13 +112,11 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-tasteometer
-fix now listening display
-investigate 404 errors
-better error handling
+scrobble/stop scrobbling
 admin page
 about page
 better layout
-better handling of constants
 cache lastfm/mongo calls
+minification
+disable angular logs in production
  */

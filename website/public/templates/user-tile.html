@@ -1,5 +1,5 @@
-<ul>
-	<li>Logged in as {{lastfmUsername}}</li>
-	<li><img data-ng-src="{{lastfmProfileImage}}"></li>
+<ul data-ng-if="userDetails">
+	<li>Logged in as {{userDetails.lastfmUsername}}</li>
+	<li><img data-ng-src="{{userDetails.lastfmProfileImage}}"></li>
 	<li><a href="/logout">Logout</a></li>
 </ul>

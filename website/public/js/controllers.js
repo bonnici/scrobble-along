@@ -4,116 +4,76 @@
 
 angular.module('scrobbleAlong.controllers', []).
 
-	controller('MenuCtrl', function($scope, $http, $cookies) {
+	controller('MenuCtrl', ['$scope', '$cookies', 'api', function($scope, $cookies, api) {
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
 
-		$http({ method: 'GET', url: '/api/login-url' }).
-			success(function(data, status, headers, config) {
-				//todo if status == 404 ...
-				$scope.loginUrl = data.loginUrl;
-			}).
-			error(function(data, status, headers, config) {
-				//todo
-			});
-	}).
+		api.getLoginUrl(function(url) {
+			$scope.loginUrl = url;
+		});
+	}]).
 
-	controller('IndexCtrl', function ($scope, $http, $cookies, $interval) {
+	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', 'api', function ($scope, $http, $cookies, $interval, api) {
+
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
-		$scope.stations = [];
 
-		var updateStationLastfmInfo = function() {
-			var chunkSize = 5;
-			var stationChunks = [];
-			for (var start=0; start < $scope.stations.length; start += chunkSize) {
-				stationChunks.push($scope.stations.slice(start, start + chunkSize));
+		//todo use MenuCtrl scope somehow?
+		api.getLoginUrl(function(url) {
+			$scope.loginUrl = url;
+		});
+
+		//todo change this to use promises?
+		api.getUserDetails(function(userDetails) {
+			$scope.userDetails = userDetails;
+
+			if ($scope.userDetails.lastfmUsername) {
+				api.getUserLastfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
+					$scope.userDetails.lastfmProfileImage = userInfo.lastfmProfileImage;
+				});
 			}
 
-			angular.forEach(stationChunks, function(stationChunk) {
-				var stationNames = '';
-				angular.forEach(stationChunk, function(station) {
-					stationNames += station.lastfmUsername + ",";
-				});
-				stationNames = stationNames.slice(0, -1);
+			api.getStationDetails(function(stationDetails) {
+				$scope.stations = stationDetails;
 
-				$http({ method: 'GET', url: '/api/station-lastfm-info', params:{ stations: stationNames } }).
-					success(function(data, status, headers, config) {
-						//todo if status == 404 ...
-						angular.forEach($scope.stations, function(station) {
-							if (data[station.lastfmUsername]) {
-								angular.extend(station, data[station.lastfmUsername]);
-							}
-						});
-					}).
-					error(function(data, status, headers, config) {
-						//todo
+				angular.forEach($scope.stations, function(station) {
+					station.userScrobbles = $scope.userDetails.userScrobbles[station.lastfmUsername];
+					station.tasteometer = 0; // Initial setting so sorting works while the page is loading
+					if (station.lastfmUsername == $scope.listeningTo) {
+						$scope.scrobblingStation = station;
+					}
+
+					api.getStationLastfmInfo(station.lastfmUsername, function(stationLastfmInfo) {
+						angular.extend(station, stationLastfmInfo);
 					});
 
-				if ($scope.lastfmUsername) {
-					$http({ method: 'GET', url: '/api/station-lastfm-tasteometer', params:{ user: $scope.lastfmUsername, stations: stationNames } }).
-						success(function(data, status, headers, config) {
-							//todo if status == 404 ...
-							angular.forEach($scope.stations, function(station) {
-								if (data[station.lastfmUsername]) {
-									station.tasteometer = data[station.lastfmUsername];
-								}
-							});
-						}).
-						error(function(data, status, headers, config) {
-							//todo
+					if ($scope.userDetails.lastfmUsername) {
+						api.getStationTasteometer(station.lastfmUsername, $scope.userDetails.lastfmUsername, function(tasteometer) {
+							station.tasteometer = tasteometer;
 						});
-				}
-			});
-		}
+					}
 
-		var updateStationLastfmRecentTracks = function() {
-			var chunkSize = 5;
-			var stationChunks = [];
-			for (var start=0; start < $scope.stations.length; start += chunkSize) {
-				stationChunks.push($scope.stations.slice(start, start + chunkSize));
-			}
-
-			angular.forEach(stationChunks, function(stationChunk) {
-				var stationNames = '';
-				angular.forEach(stationChunk, function(station) {
-					stationNames += station.lastfmUsername + ",";
-				});
-				stationNames = stationNames.slice(0, -1);
-
-				$http({ method: 'GET', url: '/api/station-lastfm-recenttracks', params:{ stations: stationNames } }).
-					success(function(data, status, headers, config) {
-						//todo if status == 404 ...
-						angular.forEach($scope.stations, function(station) {
-							if (data[station.lastfmUsername]) {
-								station.recentTracks = data[station.lastfmUsername];
-							}
-						});
-					}).
-					error(function(data, status, headers, config) {
-						//todo
+					api.getStationRecentTracks(station.lastfmUsername, function(recentTracks) {
+						if (recentTracks) {
+							station.recentTracks = recentTracks;
+						}
 					});
-			});
-		}
-		$interval(updateStationLastfmRecentTracks, 20 * 1000);
-
-		var updateUserLastfmInfo = function() {
-			if (!$scope.lastfmUsername) {
-				return;
-			}
-
-			$http({ method: 'GET', url: '/api/user-lastfm-info', params:{user: $scope.lastfmUsername} }).
-				success(function(data, status, headers, config) {
-					//todo if status == 404 ...
-					$scope.lastfmProfileImage = data.lastfmProfileImage;
-				}).
-				error(function(data, status, headers, config) {
-					//todo
 				});
-		}
+			});
+		});
 
+		// Update recent tracks every 20 seconds
+		$interval(function() {
+			angular.forEach($scope.stations, function(station) {
+				api.getStationRecentTracks(station.lastfmUsername, function(recentTracks) {
+					station.recentTracks = recentTracks;
+				});
+			});
+		}, 20 * 1000);
+
+		// Sorting of stations
 		$scope.sortStationsBy = 'lastfmUsername';
 		$scope.sortStations = function(station) {
 			if ($scope.sortStationsBy == 'scrobbles') {
-				return $scope.userScrobbles[station.lastfmUsername] * -1;
+				return station.userScrobbles * -1;
 			}
 			else if ($scope.sortStationsBy == 'compatibility') {
 				return station.tasteometer * -1;
@@ -123,70 +83,13 @@ angular.module('scrobbleAlong.controllers', []).
 			}
 		};
 
+		// Filter to hide the now playing station from the main list
 		$scope.notListening = function(station) {
-			return station.lastfmUsername != $scope.listeningTo;
+			return !$scope.userDetails || station.lastfmUsername != $scope.userDetails.listeningTo;
 		};
+	}]).
 
-		if ($scope.loggedIn) {
-			$http({ method: 'GET', url: '/api/user-details' }).
-				success(function(data, status, headers, config) {
-					//todo if status == 404 ...
-					$scope.lastfmUsername = data.username;
-					$scope.listeningTo = data.listening;
-					$scope.userScrobbles = data.scrobbles;
-					updateUserLastfmInfo();
-
-					//todo handle this using a service?
-					//todo remove duplication
-					$http({ method: 'GET', url: '/api/stations' }).
-						success(function(stations, status, headers, config) {
-							//todo if status == 404 ...
-							$scope.stations = stations;
-
-							angular.forEach(stations, function(station) {
-								station.userScrobbles = $scope.userScrobbles[station.lastfmUsername];
-								if (station.lastfmUsername == $scope.listeningTo) {
-									$scope.scrobblingStation = station;
-								}
-							});
-
-							updateStationLastfmInfo();
-							updateStationLastfmRecentTracks();
-						}).
-						error(function(data, status, headers, config) {
-							//todo
-						});
-				}).
-				error(function(data, status, headers, config) {
-					//todo
-				});
-		}
-		else {
-			$http({ method: 'GET', url: '/api/login-url' }).
-				success(function(data, status, headers, config) {
-					//todo if status == 404 ...
-					$scope.loginUrl = data.loginUrl;
-
-					//todo handle this using a service?
-					//todo remove duplication
-					$http({ method: 'GET', url: '/api/stations' }).
-						success(function(stations, status, headers, config) {
-							//todo if status == 404 ...
-							$scope.stations = stations;
-							updateStationLastfmInfo();
-							updateStationLastfmRecentTracks();
-						}).
-						error(function(data, status, headers, config) {
-							//todo
-						});
-				}).
-				error(function(data, status, headers, config) {
-					//todo
-				});
-		}
-	}).
-
-	controller('AdminCtrl', function($scope, $cookies) {
+	controller('AdminCtrl', ['$scope', '$cookies', function($scope, $cookies) {
 		// write Ctrl here
 		$scope.adminName = "Admin Bob";
 		/*
@@ -198,4 +101,4 @@ angular.module('scrobbleAlong.controllers', []).
 			$cookies.lastfmSession = "test-session";
 		}
 		*/
-	});
+	}]);
