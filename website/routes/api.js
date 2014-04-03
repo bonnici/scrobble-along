@@ -191,16 +191,42 @@ exports.stationLastfmRecentTracks = function(req, res) {
 	});
 };
 
+var updateScrobbling = function(req, res, stationName) {
+	// Load user details from cookie
+	var session = req.cookies['lastfmSession'];
+	if (!session) {
+		winston.error("Session cookie not provided when stopping scrobble");
+		res.status(500).send("Session cookie is required to stop scrobbling");
+		return;
+	}
+
+	mongoDao.getUserData(session, function (err, record) {
+		if (err || !record || !record['_id']) {
+			winston.error("Error loading user while stopping scrobble:", err);
+			res.status(500).send('Error stopping scrobble');
+		}
+		var username = record['_id'];
+		mongoDao.setUserScrobbling(username, stationName, function(err, status) {
+			if (err) {
+				winston.error("Error setting user as not scrobbling:", err);
+				res.status(500).send('Error stopping scrobble');
+			}
+			else {
+				res.send("ok");
+			}
+		});
+	});
+}
+
 exports.stopScrobbling = function(req, res) {
-	//todo
-	winston.info("stopScrobbling", req.body);
-	res.send("ok");
-	//res.status(500).send();
+	updateScrobbling(req, res, null);
 };
 
 exports.scrobbleAlong = function(req, res) {
-	//todo
-	winston.info("scrobbleAlong", req.body);
-	res.send("ok");
-	//res.status(500).send();
+	if (!req.body || !req.body.username) {
+		winston.error("Station username was not provided in request to scrobble");
+		res.status(500).send('Station username must be provided');
+		return;
+	}
+	updateScrobbling(req, res, req.body.username);
 };

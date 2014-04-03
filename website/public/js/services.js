@@ -117,7 +117,7 @@ angular.module('scrobbleAlong.services', []).
 			},
 
 			stopScrobbling: function(stationUsername, callback) {
-				postApiUrl('stop-scrobbling', { username: stationUsername }, callback);
+				postApiUrl('stop-scrobbling', { }, callback);
 			},
 
 			scrobbleAlong: function(stationUsername, callback) {

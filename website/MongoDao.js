@@ -1,4 +1,6 @@
+var winston = require("winston");
 
+//todo more logging
 var MongoDao = (function () {
 	function MongoDao(crypter, dbClient) {
 		this.crypter = crypter;
@@ -48,6 +50,41 @@ var MongoDao = (function () {
 			else {
 				collection.find().toArray(callback);
 			}
+		});
+	};
+
+	MongoDao.prototype.setUserScrobbling = function (username, stationName, callback) {
+		var updates = {};
+		if (stationName) {
+			updates = { $set: { listening: stationName } };
+			winston.info("Setting user " + username + " as scrobbling " + stationName);
+		}
+		else {
+			updates = { $unset: { listening: 1 } };
+			winston.info("Setting user " + username + " as not scrobbling");
+		}
+
+		this.dbClient.collection('user', function (error, collection) {
+			if (error) {
+				callback(error, null);
+				return;
+			}
+
+			collection.findAndModify(
+				{ _id: username },
+				[['_id', 'asc']],
+				updates,
+				{ upsert: false },
+				function (error, record) {
+					if (error) {
+						var message = "Could not update listening of user " + username + ": " + error.message;
+						winston.error(message);
+						return callback(error, null);
+					}
+					else {
+						return callback(null, "ok");
+					}
+				});
 		});
 	};
 
