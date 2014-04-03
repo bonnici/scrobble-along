@@ -4,7 +4,7 @@ block body
 	div(data-ng-controller='IndexCtrl')
 		div(data-ng-if='loggedIn')
 			div(user-tile)
-			div(data-ng-if='scrobblingStation', station-tile, station='scrobblingStation')
+			div(data-ng-repeat='station in stations | filter:{currentlyScrobbling:true}', station-tile)
 
 		div(data-ng-if='!loggedIn')
 			h3 Scrobble Along with the radio
@@ -26,4 +26,4 @@ block body
 					a(href='', data-ng-click='sortStationsBy = "compatibility"') Compatibility
 					span(data-ng-if='sortStationsBy == "compatibility"')  (selected)
 
-		div(data-ng-repeat='station in stations | filter:notListening | orderBy:sortStations', station-tile, station='station')
+		div(data-ng-repeat='station in stations | filter:{currentlyScrobbling:false} | orderBy:sortStations', station-tile)

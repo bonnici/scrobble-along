@@ -42,8 +42,6 @@ app.use(express.methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
-
-
 var winstonOpts = { timestamp: true }
 
 // development only
@@ -98,13 +96,12 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	app.get('/api/station-lastfm-info', api.stationLastfmInfo);
 	app.get('/api/station-lastfm-tasteometer', api.stationLastfmTasteometer);
 	app.get('/api/station-lastfm-recenttracks', api.stationLastfmRecentTracks);
+	app.post('/api/stop-scrobbling', api.stopScrobbling);
+	app.post('/api/scrobble-along', api.scrobbleAlong);
 
-	// redirect all others to the index (HTML5 history)
-	app.get('*', pages.index);
-
+	//todo show 404 message for other URLs
 
 	// Start Server
-
 	http.createServer(app).listen(PORT, function () {
 		winston.info('Express server listening on port ' + PORT);
 	});
@@ -113,6 +110,7 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 /*
 todo
 scrobble/stop scrobbling
+try removing async to see if things speed up
 admin page
 about page
 better layout

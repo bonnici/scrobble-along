@@ -12,4 +12,10 @@
 			</li>
 		</ul>
 	</li>
+	<li data-ng-if="!station.currentlyScrobbling">
+		<button data-ng-click="scrobbleAlong(station)">Scrobble Along</button>
+	</li>
+	<li data-ng-if="station.currentlyScrobbling">
+		<button data-ng-click="stopScrobbling(station)">Stop Scrobbling</button>
+	</li>
 </ul>

@@ -22,6 +22,18 @@ angular.module('scrobbleAlong.services', []).
 				});
 		};
 
+		var postApiUrl = function(page, data, callback) {
+			$http({ method: 'POST', url: '/api/' + page, data: data || {} }).
+				success(function(response) {
+					//$log.log("Success posting to page " + page + ":", data);
+					callback(null, response);
+				}).
+				error(function(error) {
+					//$log.log("Error posting to page " + page + ":", data);
+					callback(error, null);
+				});
+		};
+
 		var apiServiceInstance = {
 			getLoginUrl: function(callback) {
 				getApiUrl('login-url', null, function(data) {
@@ -102,6 +114,14 @@ angular.module('scrobbleAlong.services', []).
 						callback(null);
 					}
 				});
+			},
+
+			stopScrobbling: function(stationUsername, callback) {
+				postApiUrl('stop-scrobbling', { username: stationUsername }, callback);
+			},
+
+			scrobbleAlong: function(stationUsername, callback) {
+				postApiUrl('scrobble-along', { username: stationUsername }, callback);
 			}
 		};
 

@@ -12,7 +12,8 @@ angular.module('scrobbleAlong.controllers', []).
 		});
 	}]).
 
-	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', 'api', function ($scope, $http, $cookies, $interval, api) {
+	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', 'api',
+		function ($scope, $http, $cookies, $interval, api) {
 
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
 
@@ -23,7 +24,9 @@ angular.module('scrobbleAlong.controllers', []).
 
 		//todo change this to use promises?
 		api.getUserDetails(function(userDetails) {
-			$scope.userDetails = userDetails;
+			$scope.userDetails = { lastfmUsername: userDetails.lastfmUsername };
+			var userListeningTo = userDetails.listeningTo;
+			var userScrobbles = userDetails.userScrobbles;
 
 			if ($scope.userDetails.lastfmUsername) {
 				api.getUserLastfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
@@ -35,10 +38,12 @@ angular.module('scrobbleAlong.controllers', []).
 				$scope.stations = stationDetails;
 
 				angular.forEach($scope.stations, function(station) {
-					station.userScrobbles = $scope.userDetails.userScrobbles[station.lastfmUsername];
+					station.userScrobbles = userScrobbles[station.lastfmUsername] || 0;
 					station.tasteometer = 0; // Initial setting so sorting works while the page is loading
-					if (station.lastfmUsername == $scope.listeningTo) {
-						$scope.scrobblingStation = station;
+					station.currentlyScrobbling = false;
+
+					if (station.lastfmUsername == userListeningTo) {
+						station.currentlyScrobbling = true;
 					}
 
 					api.getStationLastfmInfo(station.lastfmUsername, function(stationLastfmInfo) {
@@ -67,7 +72,8 @@ angular.module('scrobbleAlong.controllers', []).
 					station.recentTracks = recentTracks;
 				});
 			});
-		}, 20 * 1000);
+		}, 200 * 1000);
+		//todo change this to 20 seconds
 
 		// Sorting of stations
 		$scope.sortStationsBy = 'lastfmUsername';
@@ -83,9 +89,37 @@ angular.module('scrobbleAlong.controllers', []).
 			}
 		};
 
-		// Filter to hide the now playing station from the main list
-		$scope.notListening = function(station) {
-			return !$scope.userDetails || station.lastfmUsername != $scope.userDetails.listeningTo;
+		var setCurrentlyScrobbling = function(scrobblingStation) {
+			angular.forEach($scope.stations, function(curStation) {
+				curStation.currentlyScrobbling = (curStation == scrobblingStation);
+			});
+		}
+
+		$scope.stopScrobbling = function(station) {
+			if (station && station.lastfmUsername) {
+				api.stopScrobbling(station.lastfmUsername, function(err, status) {
+					if (status) {
+						setCurrentlyScrobbling(null);
+					}
+					else {
+						//todo error message
+						alert("Error stopping scrobble: " + err);
+					}
+				});
+			}
+		};
+		$scope.scrobbleAlong = function(station) {
+			if (station && station.lastfmUsername) {
+				api.scrobbleAlong(station.lastfmUsername, function(err, status) {
+					if (status) {
+						setCurrentlyScrobbling(station);
+					}
+					else {
+						//todo error message
+						alert("Error scrobbling along: " + err);
+					}
+				});
+			}
 		};
 	}]).
 

@@ -12,9 +12,6 @@ angular.module('scrobbleAlong.directives', []).
 
 	directive('stationTile', function () {
 		return {
-			scope: {
-				station: '=station'
-			},
 			templateUrl: 'templates/station-tile.html'
 		};
 	}).

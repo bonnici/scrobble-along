@@ -190,3 +190,17 @@ exports.stationLastfmRecentTracks = function(req, res) {
 		res.json(recentTracks);
 	});
 };
+
+exports.stopScrobbling = function(req, res) {
+	//todo
+	winston.info("stopScrobbling", req.body);
+	res.send("ok");
+	//res.status(500).send();
+};
+
+exports.scrobbleAlong = function(req, res) {
+	//todo
+	winston.info("scrobbleAlong", req.body);
+	res.send("ok");
+	//res.status(500).send();
+};
