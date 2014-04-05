@@ -6,6 +6,7 @@ import scrap = require("./scrapers/Scraper");
 import song = require("./Song");
 import stat = require("./Station");
 import usr = require("./User");
+import usrDao = require("./UserDao");
 
 import _ = require("underscore");
 import winston = require("winston");
@@ -31,9 +32,11 @@ class ScrobblerStationData {
 export class Scrobbler {
 	private stationData:{ [index: string]: ScrobblerStationData; }
 	private lastFmDao:lfmDao.LastFmDao;
+	private userDao:usrDao.UserDao;
 
-	constructor(lastFmDao:lfmDao.LastFmDao) {
+	constructor(lastFmDao:lfmDao.LastFmDao, userDao:usrDao.UserDao) {
 		this.lastFmDao = lastFmDao;
+		this.userDao = userDao;
 		this.stationData = {};
 	}
 
@@ -144,6 +147,16 @@ export class Scrobbler {
 		_.each(users, (user) => {
 			if (user) {
 				this.lastFmDao.scrobble(songToScrobble, user.UserName, user.Session);
+				this.userDao.incrementUserScrobble(user.UserName, station.StationName, (err, status) => {
+					if (err) {
+						winston.info("Error incrementing scrobble count for user " + user.UserName + " and station " +
+							station.StationName + ":", err);
+					}
+					else {
+						winston.info("Incremented scrobble count for user " + user.UserName + " and station " +
+							station.StationName);
+					}
+				});
 			}
 		});
 	}

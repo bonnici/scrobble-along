@@ -11,6 +11,7 @@ import winston = require("winston");
 
 export interface UserDao {
 	getUsersListeningToStation(station:string, callback:(err, users:u.User[]) => void): void;
+	incrementUserScrobble(listener: string, station: string, callback:(err, string) => void): void;
 }
 
 export class DummyUserDao implements UserDao {
@@ -27,6 +28,10 @@ export class DummyUserDao implements UserDao {
 				{ UserName: "User2", Session: "" }
 			]);
 		}
+	}
+
+	incrementUserScrobble(listener: string, station: string, callback:(err, string) => void): void {
+		return callback(null, "ok");
 	}
 }
 
@@ -67,6 +72,26 @@ export class MongoUserDao implements UserDao {
 					}
 				});
 				callback(null, users);
+			});
+		});
+	}
+
+	incrementUserScrobble(listener: string, station: string, callback:(err, string) => void): void {
+		this.dbClient.collection('user', (error, collection) => {
+			if (error) {
+				callback(error, null);
+				return;
+			}
+
+			var incData = {};
+			incData['scrobbles.' + station] = 1;
+			collection.update({ _id: listener }, { $inc: incData }, (err) => {
+				if (err) {
+					callback(err, null);
+				}
+				else {
+					callback(null, "ok");
+				}
 			});
 		});
 	}

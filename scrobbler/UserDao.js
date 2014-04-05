@@ -24,6 +24,10 @@ var DummyUserDao = (function () {
             ]);
         }
     };
+
+    DummyUserDao.prototype.incrementUserScrobble = function (listener, station, callback) {
+        return callback(null, "ok");
+    };
     return DummyUserDao;
 })();
 exports.DummyUserDao = DummyUserDao;
@@ -66,6 +70,25 @@ var MongoUserDao = (function () {
                     }
                 });
                 callback(null, users);
+            });
+        });
+    };
+
+    MongoUserDao.prototype.incrementUserScrobble = function (listener, station, callback) {
+        this.dbClient.collection('user', function (error, collection) {
+            if (error) {
+                callback(error, null);
+                return;
+            }
+
+            var incData = {};
+            incData['scrobbles.' + station] = 1;
+            collection.update({ _id: listener }, { $inc: incData }, function (err) {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    callback(null, "ok");
+                }
             });
         });
     };

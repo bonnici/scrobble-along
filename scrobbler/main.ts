@@ -108,28 +108,6 @@ var lastfmNode = new lastfm.LastFmNode({
 
 var lastFmDao = SHOULD_SCROBBLE == "true" ? new lfmDao.LastFmDaoImpl(lastfmNode) : new lfmDao.DummyLastFmDao();
 
-var scrobbler = new scrob.Scrobbler(lastFmDao);
-
-function scrapeAndScrobbleAllStations(stationDao, userDao) {
-	stationDao.getStations((err, stations: stat.Station[]) => {
-		if (err) return; // Assume error logging is done by DAO
-
-		_.each(stations, (station:stat.Station) => {
-			if (!station) return; // break
-
-			if (station.Disabled) {
-				winston.info("Station " + station.StationName + " is disabled and was skipped");
-				return; // break
-			}
-
-			userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
-				if (err) return; // break
-				scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
-			});
-		});
-	});
-};
-
 mongodb.connect(MONGO_URI, (err, dbClient) => {
 	if (err) {
 		winston.err("Error connecting to MongoDB:", err);
@@ -138,11 +116,31 @@ mongodb.connect(MONGO_URI, (err, dbClient) => {
 
 	var stationDao = new statDao.MongoStationDao(dbClient, new crypt.CrypterImpl(STATION_CRYPTO_KEY));
 	var userDao = new usrDao.MongoUserDao(dbClient, new crypt.CrypterImpl(USER_CRYPTO_KEY));
+	var scrobbler = new scrob.Scrobbler(lastFmDao, userDao);
 
 	setInterval(() => { scrapeAndScrobbleAllStations(stationDao, userDao); }, interval);
 	scrapeAndScrobbleAllStations(stationDao, userDao);
-});
 
+	function scrapeAndScrobbleAllStations(stationDao, userDao) {
+		stationDao.getStations((err, stations: stat.Station[]) => {
+			if (err) return; // Assume error logging is done by DAO
+
+			_.each(stations, (station:stat.Station) => {
+				if (!station) return; // break
+
+				if (station.Disabled) {
+					winston.info("Station " + station.StationName + " is disabled and was skipped");
+					return; // break
+				}
+
+				userDao.getUsersListeningToStation(station.StationName, (err, users:usr.User[]) => {
+					if (err) return; // break
+					scrobbler.scrapeAndScrobble(scrapers[station.ScraperName], station, users);
+				});
+			});
+		});
+	};
+});
 
 //////////////
 // Scrobbler that scrapes but does not scrobble or load proper users/stations
