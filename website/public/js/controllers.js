@@ -12,8 +12,78 @@ angular.module('scrobbleAlong.controllers', []).
 		});
 	}]).
 
-	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', 'api',
-		function ($scope, $http, $cookies, $interval, api) {
+	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', '$timeout', 'api',
+		function ($scope, $http, $cookies, $interval, $timeout, api) {
+
+		// Updates the recent track names & images of a batch of stations and continues until all are loaded
+		var updateStationRecentTracksBatch = function(stationNames, batchSize) {
+			if (stationNames.length == 0) {
+				console.log("Doen getting station recent tracks", new Date());
+				return;
+			}
+
+			var batch = stationNames.splice(0, batchSize);
+
+			console.log("Getting station recent tracks for a batch", new Date());
+			api.getStationRecentTracks(batch, function(batchRecentTracks) {
+				angular.forEach($scope.stations, function(station) {
+					if (batchRecentTracks[station.lastfmUsername]) {
+						station.recentTracks = batchRecentTracks[station.lastfmUsername];
+					}
+				});
+
+				updateStationRecentTracksBatch(stationNames, batchSize);
+			});
+		};
+
+		// Updates the recent track names & images of all stations
+		var updateStationRecentTracks = function() {
+			var stationNames = [];
+			angular.forEach($scope.stations, function(station) {
+				stationNames.push(station.lastfmUsername);
+			});
+
+			var batchSize = 10;
+			updateStationRecentTracksBatch(stationNames, batchSize);
+		};
+
+		// Updates the profile pic and tasteometer of a batch of stations and continues on to the next batch.
+		// Calls callback only when all batches are processed.
+		var updateStationLastfmInfoBatch = function(stationNames, batchSize, callback) {
+			if (stationNames.length == 0) {
+				callback();
+				return;
+			}
+
+			var batch = stationNames.splice(0, batchSize);
+
+			console.log("Getting station last.fm details for a batch", new Date());
+			api.getStationLastfmInfo(batch, $scope.userDetails.lastfmUsername, function(batchLastfmInfos) {
+				angular.forEach($scope.stations, function(station) {
+					if (batchLastfmInfos[station.lastfmUsername]) {
+						angular.extend(station, batchLastfmInfos[station.lastfmUsername]);
+					}
+				});
+
+				updateStationLastfmInfoBatch(stationNames, batchSize, callback);
+			});
+		};
+
+		// Updates the profile pic/tasteometer of all stations then starts updating the recent tracks
+		var updateStationLastfmInfo = function() {
+			var stationNames = [];
+			angular.forEach($scope.stations, function(station) {
+				stationNames.push(station.lastfmUsername);
+			});
+
+			var batchSize = 10;
+			updateStationLastfmInfoBatch(stationNames, batchSize, function() {
+				updateStationRecentTracks();
+
+				// Update recent tracks every 20 seconds
+				$interval(updateStationRecentTracks, 20 * 1000);
+			});
+		};
 
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
 
@@ -23,6 +93,7 @@ angular.module('scrobbleAlong.controllers', []).
 		});
 
 		//todo change this to use promises?
+		console.log("Getting user details", new Date());
 		api.getUserDetails(function(userDetails) {
 			$scope.userDetails = { lastfmUsername: userDetails.lastfmUsername };
 			var userListeningTo = userDetails.listeningTo;
@@ -30,10 +101,13 @@ angular.module('scrobbleAlong.controllers', []).
 
 			if ($scope.userDetails.lastfmUsername) {
 				api.getUserLastfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
-					$scope.userDetails.lastfmProfileImage = userInfo.lastfmProfileImage;
+					if (userInfo.lastfmProfileImage) {
+						$scope.userDetails.lastfmProfileImage = userInfo.lastfmProfileImage;
+					}
 				});
 			}
 
+			console.log("Getting station details", new Date());
 			api.getStationDetails(function(stationDetails) {
 				$scope.stations = stationDetails;
 
@@ -45,35 +119,11 @@ angular.module('scrobbleAlong.controllers', []).
 					if (station.lastfmUsername == userListeningTo) {
 						station.currentlyScrobbling = true;
 					}
-
-					api.getStationLastfmInfo(station.lastfmUsername, function(stationLastfmInfo) {
-						angular.extend(station, stationLastfmInfo);
-					});
-
-					if ($scope.userDetails.lastfmUsername) {
-						api.getStationTasteometer(station.lastfmUsername, $scope.userDetails.lastfmUsername, function(tasteometer) {
-							station.tasteometer = tasteometer;
-						});
-					}
-
-					api.getStationRecentTracks(station.lastfmUsername, function(recentTracks) {
-						if (recentTracks) {
-							station.recentTracks = recentTracks;
-						}
-					});
 				});
+
+				updateStationLastfmInfo();
 			});
 		});
-
-		// Update recent tracks every 20 seconds
-		$interval(function() {
-			angular.forEach($scope.stations, function(station) {
-				api.getStationRecentTracks(station.lastfmUsername, function(recentTracks) {
-					station.recentTracks = recentTracks;
-				});
-			});
-		}, 200 * 1000);
-		//todo change this to 20 seconds
 
 		// Sorting of stations
 		$scope.sortStationsBy = 'lastfmUsername';

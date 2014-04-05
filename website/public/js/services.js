@@ -82,38 +82,13 @@ angular.module('scrobbleAlong.services', []).
 				});
 			},
 
-			getStationLastfmInfo: function(stationUsername, callback) {
-				getApiUrl('station-lastfm-info', { stations: [stationUsername] }, function(data) {
-					if (data && data[stationUsername]) {
-						callback(data[stationUsername]);
-					}
-					else {
-						callback(null);
-					}
-				});
+			getStationLastfmInfo: function(stationUsernames, username, callback) {
+				var params = { stations: stationUsernames.join(","), user: username };
+				getApiUrl('station-lastfm-info', params, callback);
 			},
 
-			getStationTasteometer: function(stationUsername, username, callback) {
-				var params = { user: username, stations: [stationUsername] };
-				getApiUrl('station-lastfm-tasteometer', params, function(data) {
-					if (data && data[stationUsername]) {
-						callback(data[stationUsername]);
-					}
-					else {
-						callback(0);
-					}
-				});
-			},
-
-			getStationRecentTracks: function(stationUsername, callback) {
-				getApiUrl('station-lastfm-recenttracks', { stations: [stationUsername] }, function(data) {
-					if (data && data[stationUsername]) {
-						callback(data[stationUsername]);
-					}
-					else {
-						callback(null);
-					}
-				});
+			getStationRecentTracks: function(stationUsernames, callback) {
+				getApiUrl('station-lastfm-recenttracks', { stations: stationUsernames.join(",") }, callback);
 			},
 
 			stopScrobbling: function(stationUsername, callback) {

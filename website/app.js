@@ -94,7 +94,7 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	app.get('/api/stations', api.stations);
 	app.get('/api/user-lastfm-info', api.userLastfmInfo);
 	app.get('/api/station-lastfm-info', api.stationLastfmInfo);
-	app.get('/api/station-lastfm-tasteometer', api.stationLastfmTasteometer);
+	//app.get('/api/station-lastfm-tasteometer', api.stationLastfmTasteometer);
 	app.get('/api/station-lastfm-recenttracks', api.stationLastfmRecentTracks);
 	app.post('/api/stop-scrobbling', api.stopScrobbling);
 	app.post('/api/scrobble-along', api.scrobbleAlong);
@@ -109,12 +109,11 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-scrobble/stop scrobbling
-try removing async to see if things speed up
 admin page
 about page
 better layout
 cache lastfm/mongo calls
 minification
+better server-side error logs
 disable angular logs in production
  */
