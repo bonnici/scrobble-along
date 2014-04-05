@@ -52,11 +52,26 @@ var MONGO_URI = process.env.SA_MONGO_URI;
 var LASTFM_API_KEY = process.env.SA_LASTFM_API_KEY;
 var LASTFM_SECRET = process.env.SA_LASTFM_SECRET;
 var SHOULD_SCROBBLE = process.env.SA_SHOULD_SCROBBLE;
+var NODE_ENV = process.env.NODE_ENV;
 
-if (!STATION_CRYPTO_KEY || !USER_CRYPTO_KEY || !MONGO_URI || !LASTFM_API_KEY || !LASTFM_SECRET || !SHOULD_SCROBBLE) {
+if (!STATION_CRYPTO_KEY || !USER_CRYPTO_KEY || !MONGO_URI || !LASTFM_API_KEY || !LASTFM_SECRET || !SHOULD_SCROBBLE
+	|| !NODE_ENV) {
 	winston.error("A required environment variable is missing:", process.env);
 	process.exit(1);
 }
+
+// winston config
+var winstonOpts = { timestamp: true }
+if (NODE_ENV === 'production') {
+	winstonOpts['colorize'] = false;
+	winstonOpts['level'] = 'warn';
+}
+else {
+	winstonOpts['colorize'] = true;
+	winstonOpts['level'] = 'info';
+}
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, winstonOpts);
 
 var interval = 15000; // 15 seconds
 var scrapers:{ [index: string]: scrap.Scraper; } = {
