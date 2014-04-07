@@ -18,13 +18,11 @@ angular.module('scrobbleAlong.controllers', []).
 		// Updates the recent track names & images of a batch of stations and continues until all are loaded
 		var updateStationRecentTracksBatch = function(stationNames, batchSize) {
 			if (stationNames.length == 0) {
-				console.log("Doen getting station recent tracks", new Date());
 				return;
 			}
 
 			var batch = stationNames.splice(0, batchSize);
 
-			console.log("Getting station recent tracks for a batch", new Date());
 			api.getStationRecentTracks(batch, function(batchRecentTracks) {
 				angular.forEach($scope.stations, function(station) {
 					if (batchRecentTracks[station.lastfmUsername]) {
@@ -57,7 +55,6 @@ angular.module('scrobbleAlong.controllers', []).
 
 			var batch = stationNames.splice(0, batchSize);
 
-			console.log("Getting station last.fm details for a batch", new Date());
 			api.getStationLastfmInfo(batch, $scope.userDetails.lastfmUsername, function(batchLastfmInfos) {
 				angular.forEach($scope.stations, function(station) {
 					if (batchLastfmInfos[station.lastfmUsername]) {
@@ -81,7 +78,7 @@ angular.module('scrobbleAlong.controllers', []).
 				updateStationRecentTracks();
 
 				// Update recent tracks every 20 seconds
-				$interval(updateStationRecentTracks, 20 * 1000);
+				$interval(function() { updateStationRecentTracks(); }, 20 * 1000);
 			});
 		};
 
@@ -93,11 +90,10 @@ angular.module('scrobbleAlong.controllers', []).
 		});
 
 		//todo change this to use promises?
-		console.log("Getting user details", new Date());
 		api.getUserDetails(function(userDetails) {
 			$scope.userDetails = { lastfmUsername: userDetails.lastfmUsername };
 			var userListeningTo = userDetails.listeningTo;
-			var userScrobbles = userDetails.userScrobbles;
+			var userScrobbles = userDetails.userScrobbles || {};
 
 			if ($scope.userDetails.lastfmUsername) {
 				api.getUserLastfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
@@ -107,7 +103,6 @@ angular.module('scrobbleAlong.controllers', []).
 				});
 			}
 
-			console.log("Getting station details", new Date());
 			api.getStationDetails(function(stationDetails) {
 				$scope.stations = stationDetails;
 
@@ -173,16 +168,157 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 	}]).
 
-	controller('AdminCtrl', ['$scope', '$cookies', function($scope, $cookies) {
-		// write Ctrl here
-		$scope.adminName = "Admin Bob";
-		/*
+	controller('AdminCtrl', ['$scope', 'api', function($scope, api) {
+		$scope.newStation = {};
+		var updates = [];
+		var addUpdate = function(update) {
+			updates.push(update);
+			$scope.updatesText = updates.join("\n");
+		}
 
-		if ($cookies.lastfmSession) {
-			delete $cookies.lastfmSession;
-		}
-		else {
-			$cookies.lastfmSession = "test-session";
-		}
-		*/
+		var loadUsers = function() {
+			api.getAllUsers(function(userDetails) {
+				$scope.userDetails = userDetails;
+
+				$scope.numUsers = 0;
+				$scope.numUsersScrobbling = 0;
+				angular.forEach($scope.userDetails, function(user) {
+					$scope.numUsers++;
+					if (user.listening) {
+						$scope.numUsersScrobbling++;
+					}
+				});
+			});
+		};
+
+		var loadStations = function() {
+			api.getAllStations(function(stationDetails) {
+				$scope.stationDetails = stationDetails;
+			});
+		};
+
+		loadUsers();
+		loadStations();
+
+		$scope.addStation = function() {
+			api.addStation($scope.newStation, function(err, status) {
+				if (err) {
+					addUpdate("Error adding station " + $scope.newStation['_id'] + ": " + err);
+				}
+				else {
+					addUpdate("Added station " + $scope.newStation['_id']);
+				}
+				$scope.newStation = {};
+				loadStations();
+			});
+		};
+
+		$scope.updateStation = function(station) {
+			api.updateStation(station, function(err, status) {
+				if (err) {
+					addUpdate("Error updating station " + station['_id'] + ": " + err);
+				}
+				else {
+					addUpdate("Updated station " + station['_id']);
+				}
+				loadStations();
+			});
+		};
+
+		$scope.clearUserListening = function(user, reload, callback) {
+			api.clearUserListening(user['_id'], function(err, status) {
+				if (err) {
+					addUpdate(err);
+				}
+				else {
+					addUpdate("Cleared user " + user['_id'] + " listening");
+				}
+
+				if (reload) {
+					loadUsers();
+				}
+
+				if (callback) {
+					callback(err, status);
+				}
+			});
+		};
+
+		$scope.clearUserSession = function(user, reload, callback) {
+			api.clearUserSession(user['_id'], function(err, status) {
+				if (err) {
+					addUpdate(err);
+				}
+				else {
+					addUpdate("Cleared user " + user['_id'] + " session");
+				}
+
+				if (reload) {
+					loadUsers();
+				}
+
+				if (callback) {
+					callback(err, status);
+				}
+			});
+		};
+
+		var doClearAllUserListening = function(userDetails, callback) {
+			if (!userDetails || userDetails.length == 0) {
+				callback();
+				return;
+			}
+			else {
+				var singleUser = userDetails.splice(0, 1);
+				if (singleUser[0].listening) {
+					$scope.clearUserListening(singleUser[0], false, function() {
+						doClearAllUserListening(userDetails, callback);
+					});
+				}
+				else {
+					doClearAllUserListening(userDetails, callback);
+				}
+			}
+		};
+
+		$scope.clearAllUserListening = function() {
+			var userDetails = $scope.userDetails.slice(0);
+			doClearAllUserListening(userDetails, function() {
+				loadUsers();
+			});
+		};
+
+		var doClearAllUserSessions = function(userDetails, callback) {
+			if (!userDetails || userDetails.length == 0) {
+				callback();
+				return;
+			}
+			else {
+				var singleUser = userDetails.splice(0, 1);
+				if (singleUser[0].session) {
+					$scope.clearUserSession(singleUser[0], false, function() {
+						doClearAllUserSessions(userDetails, callback);
+					});
+				}
+				else {
+					doClearAllUserSessions(userDetails, callback);
+				}
+			}
+		};
+
+		$scope.clearAllUserSessions = function() {
+			var userDetails = $scope.userDetails.slice(0);
+			doClearAllUserSessions(userDetails, function() {
+				loadUsers();
+			});
+		};
+
+		$scope.sortStations = function(station) {
+			return station['_id'];
+		};
+
+		$scope.sortUsers = function(user) {
+			return user.listening;
+		};
+
 	}]);

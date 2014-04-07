@@ -244,3 +244,162 @@ exports.scrobbleAlong = function(req, res) {
 	}
 	updateScrobbling(req, res, req.body.username);
 };
+
+
+var checkAdmin = function(req, callback) {
+	var encryptedSession = req.cookies['lastfmSession'];
+	if (!encryptedSession) {
+		winston.warn("Admin check with no session");
+		callback(false);
+		return;
+	}
+
+	mongoDao.getUserData(encryptedSession, function(err, userData) {
+		if (err || !userData || !userData['_id']) {
+			winston.error("Error getting user data for admin check:", err);
+			callback(false);
+			return;
+		}
+
+		callback(userData['_id'] == process.env.SA_ADMIN_USERNAME);
+	});
+};
+
+exports.allUsers = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		mongoDao.getAllUserData(function(err, userData) {
+			if (err) {
+				winston.error("Error getting all user data:", err);
+				res.status(500).send('Error getting all user data');
+				return;
+			}
+
+			res.json(userData);
+		});
+	});
+};
+
+exports.allStations = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		mongoDao.getAllStationData(function(err, stationData) {
+			if (err) {
+				winston.error("Error getting all station data:", err);
+				res.status(500).send('Error getting all station data');
+				return;
+			}
+
+			res.json(stationData);
+		});
+	});
+};
+
+
+exports.addStation = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		if (!req.body.station) {
+			winston.error("No station provided");
+			res.status(500).send('Station must be provided');
+			return;
+		}
+
+		mongoDao.addStation(req.body.station, function(err, status) {
+			if (err) {
+				winston.error("Error adding station:", err);
+				res.status(500).send('Error adding station');
+				return;
+			}
+
+			res.status(200).send();
+		});
+	});
+};
+
+exports.updateStation = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		if (!req.body.station) {
+			winston.error("No station provided");
+			res.status(500).send('Station must be provided');
+			return;
+		}
+
+		mongoDao.updateStation(req.body.station, function(err, status) {
+			if (err) {
+				winston.error("Error updating station:", err);
+				res.status(500).send('Error updating station');
+				return;
+			}
+
+			res.status(200).send();
+		});
+	});
+};
+
+exports.clearUserSession = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		if (!req.body.username) {
+			winston.error("No username provided");
+			res.status(500).send('Username must be provided');
+			return;
+		}
+
+		mongoDao.clearUserSession(req.body.username, function(err, status) {
+			if (err) {
+				winston.error("Error clearing user " + req.body.username + " session:", err);
+				res.status(500).send("'Error clearing user " + req.body.username + " session");
+				return;
+			}
+
+			res.status(200).send();
+		});
+	});
+};
+
+exports.clearUserListening = function(req, res) {
+	checkAdmin(req, function(isAdmin) {
+		if (!isAdmin) {
+			res.status(404).send();
+			return;
+		}
+
+		if (!req.body.username) {
+			winston.error("No username provided");
+			res.status(500).send('Username must be provided');
+			return;
+		}
+
+		mongoDao.clearUserListening(req.body.username, function(err, status) {
+			if (err) {
+				winston.error("Error clearing user " + req.body.username + " listening:", err);
+				res.status(500).send("'Error clearing user " + req.body.username + " listening");
+				return;
+			}
+
+			res.status(200).send();
+		});
+	});
+};

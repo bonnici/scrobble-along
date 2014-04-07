@@ -92,11 +92,35 @@ angular.module('scrobbleAlong.services', []).
 			},
 
 			stopScrobbling: function(stationUsername, callback) {
-				postApiUrl('stop-scrobbling', { }, callback);
+				postApiUrl('stop-scrobbling', {}, callback);
 			},
 
 			scrobbleAlong: function(stationUsername, callback) {
 				postApiUrl('scrobble-along', { username: stationUsername }, callback);
+			},
+
+			getAllUsers: function(callback) {
+				getApiUrl('admin/users', {}, callback);
+			},
+
+			getAllStations: function(callback) {
+				getApiUrl('admin/stations', {}, callback);
+			},
+
+			addStation: function(station, callback) {
+				postApiUrl('admin/add-station', { station: station }, callback);
+			},
+
+			updateStation: function(station, callback) {
+				postApiUrl('admin/update-station', { station: station }, callback);
+			},
+
+			clearUserListening: function(username, callback) {
+				postApiUrl('admin/clear-listening', { username: username }, callback);
+			},
+
+			clearUserSession: function(username, callback) {
+				postApiUrl('admin/clear-session', { username: username }, callback);
 			}
 		};
 

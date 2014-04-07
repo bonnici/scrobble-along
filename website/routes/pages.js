@@ -11,12 +11,32 @@ exports.init = function(crypt, lfm, mng) {
 };
 
 exports.index = function(req, res) {
-	// if session is set in the cookie, make sure we can still
 	res.render('index');
 };
 
 exports.admin = function(req, res) {
-	res.render('admin');
+	var encryptedSession = req.cookies['lastfmSession'];
+	if (!encryptedSession) {
+		winston.warn("Admin attempt with no session");
+		res.redirect("/");
+		return;
+	}
+
+	mongoDao.getUserData(encryptedSession, function(err, userData) {
+		if (err || !userData) {
+			winston.error("Error getting user data for admin:", err);
+			res.redirect("/");
+			return;
+		}
+
+		if (userData['_id'] != process.env.SA_ADMIN_USERNAME) {
+			winston.warn("Admin attempt from non-admin");
+			res.redirect("/");
+		}
+		else {
+			res.render('admin');
+		}
+	});
 };
 
 exports.login = function(req, res) {
@@ -53,15 +73,32 @@ exports.login = function(req, res) {
 };
 
 exports.logout = function(req, res) {
-	if (req.cookies['lastfmSession']) {
-		if (!('keep-scrobbling' in req.query)) {
-			/*
-			env.updater.removeListener(encryptedSession,
-				() => { },  //todo? env.db.clearUserSession(encryptedSession, () => { }, () => { });?
-				() => { }); //todo?
-			*/
-		}
-		res.clearCookie('lastfmSession');
+	var encryptedSession = req.cookies['lastfmSession'];
+	if (!encryptedSession) {
+		winston.warn("Logout attempt with no session");
+		res.redirect("/");
+		return;
 	}
-	res.redirect("/");
+
+	res.clearCookie('lastfmSession');
+
+	if ('keep-scrobbling' in req.query) {
+		res.redirect("/");
+		return;
+	}
+
+	mongoDao.getUserData(encryptedSession, function(err, userData) {
+		if (err || !userData || !userData['_id']) {
+			winston.error("Error getting user data on logout:", err);
+			res.redirect("/");
+			return;
+		}
+
+		mongoDao.setUserScrobbling(userData['_id'], null, function(err, status) {
+			if (err) {
+				winston.error("Error clearing user scrobble station:", err);
+			}
+			res.redirect("/");
+		});
+	});
 };

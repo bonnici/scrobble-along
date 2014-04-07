@@ -18,9 +18,12 @@ var BASE_URL = process.env.SA_BASE_URL;
 var LASTFM_API_KEY = process.env.SA_LASTFM_API_KEY;
 var LASTFM_SECRET = process.env.SA_LASTFM_SECRET;
 var USER_CRYPTO_KEY = process.env.SA_USER_CRYPTO_KEY;
+var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
 var MONGO_URI = process.env.SA_MONGO_URI;
+var ADMIN_USERNAME = process.env.SA_ADMIN_USERNAME;
 
-if (!PORT || !NODE_ENV || !BASE_URL || !LASTFM_API_KEY || !USER_CRYPTO_KEY || !LASTFM_SECRET || !MONGO_URI) {
+if (!PORT || !NODE_ENV || !BASE_URL || !LASTFM_API_KEY || !USER_CRYPTO_KEY || !STATION_CRYPTO_KEY || !LASTFM_SECRET
+	|| !MONGO_URI || !ADMIN_USERNAME) {
 	winston.error("A required environment variable is missing:", process.env);
 	process.exit(1);
 }
@@ -60,7 +63,8 @@ if (app.get('env') === 'production') {
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, winstonOpts);
 
-var crypter = new crypt.CrypterImpl(USER_CRYPTO_KEY);
+var userCrypter = new crypt.CrypterImpl(USER_CRYPTO_KEY);
+var stationCrypter = new crypt.CrypterImpl(STATION_CRYPTO_KEY);
 
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
@@ -76,9 +80,9 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 		process.exit(1);
 	}
 
-	var mongoDao = new mngDao.MongoDao(crypter, dbClient);
+	var mongoDao = new mngDao.MongoDao(userCrypter, stationCrypter, dbClient);
 
-	pages.init(crypter, lastfmDao, mongoDao);
+	pages.init(userCrypter, lastfmDao, mongoDao);
 	api.init(lastfmDao, mongoDao);
 
 	// Routes
@@ -94,12 +98,20 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	app.get('/api/stations', api.stations);
 	app.get('/api/user-lastfm-info', api.userLastfmInfo);
 	app.get('/api/station-lastfm-info', api.stationLastfmInfo);
-	//app.get('/api/station-lastfm-tasteometer', api.stationLastfmTasteometer);
 	app.get('/api/station-lastfm-recenttracks', api.stationLastfmRecentTracks);
+
 	app.post('/api/stop-scrobbling', api.stopScrobbling);
 	app.post('/api/scrobble-along', api.scrobbleAlong);
 
-	//todo show 404 message for other URLs
+	app.get('/api/admin/users', api.allUsers);
+	app.get('/api/admin/stations', api.allStations);
+
+	app.post('/api/admin/add-station', api.addStation);
+	app.post('/api/admin/update-station', api.updateStation);
+	app.post('/api/admin/clear-listening', api.clearUserListening);
+	app.post('/api/admin/clear-session', api.clearUserSession);
+
+	//todo show 404 message/page for other URLs
 
 	// Start Server
 	http.createServer(app).listen(PORT, function () {
@@ -109,9 +121,10 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-admin page
+check return after callbacks
 about page
 better layout
+if session does not find user, clear cookie and refresh
 cache lastfm/mongo calls
 minification
 better server-side error logs

@@ -2,8 +2,48 @@ extends layout
 
 block body
 	div(data-ng-controller='AdminCtrl')
-		h2 Hello {{adminName}}
+		h2 Admin Page
+
+		h3 Updates
+		textarea(data-ng-model='updatesText', disabled, rows='5', cols='100')
+
+		h3 Stations
+
+		div Username / Scraper / Scraper Param / Station URL / Stream URL / Disabled / Session
 
 		div
-			| Angular seed app: v
-			span(data-app-version)
+			input(type='text', data-ng-model='newStation["_id"]')
+			input(type='text', data-ng-model='newStation.parser')
+			input(type='text', data-ng-model='newStation.scraperParam')
+			input(type='text', data-ng-model='newStation.stationUrl')
+			input(type='text', data-ng-model='newStation.streamUrl')
+			input(type='checkbox', data-ng-model='newStation.disabled')
+			input(type='text', data-ng-model='newStation.session')
+			button(data-ng-click='addStation()') Add
+
+		div(data-ng-repeat='station in stationDetails | orderBy:sortStations')
+			input(type='text', data-ng-model='station["_id"]', disabled)
+			input(type='text', data-ng-model='station.parser')
+			input(type='text', data-ng-model='station.scraperParam')
+			input(type='text', data-ng-model='station.stationUrl')
+			input(type='text', data-ng-model='station.streamUrl')
+			input(type='checkbox', data-ng-model='station.disabled', data-ng-true-value="true")
+			input(type='text', data-ng-model='station.session')
+			button(data-ng-click='updateStation(station)') Update
+
+		h3 Users
+
+		div {{numUsers}} total, {{numUsersScrobbling}} scrobbling
+
+		div
+			button(data-ng-click='clearAllUserListening()') Clear all listening
+			button(data-ng-click='clearAllUserSessions()') Clear all sessions
+
+		div Username / Listening / Session
+
+		div(data-ng-repeat='user in userDetails | orderBy:sortUsers')
+			input(type='text', data-ng-model='user["_id"]', disabled)
+			input(type='text', data-ng-model='user.listening', disabled)
+			input(type='text', data-ng-model='user.session', disabled)
+			button(data-ng-click='clearUserListening(user, true)') Clear Listening
+			button(data-ng-click='clearUserSession(user, true)') Clear Session
