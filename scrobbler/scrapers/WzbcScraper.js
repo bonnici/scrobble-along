@@ -33,7 +33,8 @@ var WzbcScraper = (function (_super) {
     WzbcScraper.prototype.parseHtml = function (body, callback) {
         if (!body) {
             winston.warn("WzbcScraper: No HTML body");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         var $ = cheerio.load(body);
@@ -42,7 +43,8 @@ var WzbcScraper = (function (_super) {
 
         if (playlistRows.length < 1) {
             winston.info("WzbcScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         var artist = playlistRows.first().find('span.aw').text();
@@ -50,7 +52,8 @@ var WzbcScraper = (function (_super) {
 
         if (!artist || !song) {
             winston.info("WzbcScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
+            return;
         }
 
         artist = artist.trim();
@@ -58,10 +61,10 @@ var WzbcScraper = (function (_super) {
 
         if (!artist || !song) {
             winston.info("WzbcScraper could not find song");
-            return callback(null, { Artist: null, Track: null });
+            callback(null, { Artist: null, Track: null });
         } else {
             winston.info("WzbcScraper found song " + artist + " - " + song);
-            return callback(null, { Artist: artist, Track: song });
+            callback(null, { Artist: artist, Track: song });
         }
     };
     return WzbcScraper;

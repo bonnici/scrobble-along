@@ -15,7 +15,7 @@ export interface StationDao {
 
 export class DummyStationDao implements StationDao {
 	getStations(callback:(err, stations:s.Station[]) => void): void {
-		return callback(null, [
+		callback(null, [
 			{ StationName: "Station1", ScraperName: "Scraper1", Session: "" },
 			{ StationName: "Station1", ScraperName: "Scraper2", Session: "" },
 			{ StationName: "Station1", ScraperName: "Scraper1", Session: "" }
@@ -29,7 +29,8 @@ export class MongoStationDao implements StationDao {
 
 	getStations(callback:(err, stations:s.Station[]) => void): void {
 		if (!this.dbClient || !this.crypter) {
-			return callback("Invalid DAO setup", null);
+			callback("Invalid DAO setup", null);
+			return;
 		}
 
 		this.dbClient.collection('station', (error, collection) => {

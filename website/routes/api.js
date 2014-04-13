@@ -218,6 +218,7 @@ var updateScrobbling = function(req, res, stationName) {
 		if (err || !record || !record['_id']) {
 			winston.error("Error loading user while stopping scrobble:", err);
 			res.status(500).send('Error stopping scrobble');
+			return;
 		}
 		var username = record['_id'];
 		mongoDao.setUserScrobbling(username, stationName, function(err, status) {

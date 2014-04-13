@@ -13,20 +13,20 @@ var DummyUserDao = (function () {
     }
     DummyUserDao.prototype.getUsersListeningToStation = function (station, callback) {
         if (station == "Station1") {
-            return callback(null, [
+            callback(null, [
                 { UserName: "User1", Session: "" },
                 { UserName: "User2", Session: "" },
                 { UserName: "User3", Session: "" }
             ]);
         } else {
-            return callback(null, [
+            callback(null, [
                 { UserName: "User2", Session: "" }
             ]);
         }
     };
 
     DummyUserDao.prototype.incrementUserScrobble = function (listener, station, callback) {
-        return callback(null, "ok");
+        callback(null, "ok");
     };
     return DummyUserDao;
 })();

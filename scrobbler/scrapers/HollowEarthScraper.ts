@@ -30,7 +30,8 @@ export class HollowEarthScraper extends scrap.Scraper {
 
 		if (split.length <= 1) {
 			winston.info("HollowEarthScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		var currentSong = split[1];
@@ -38,9 +39,10 @@ export class HollowEarthScraper extends scrap.Scraper {
 
 		if (currentSongSplit.length >= 2) {
 			winston.info("HollowEarthScraper found song " + currentSongSplit[0] + " - " + currentSongSplit[1]);
-			return callback(null, { Artist: currentSongSplit[0], Track: currentSongSplit[1] });
+			callback(null, { Artist: currentSongSplit[0], Track: currentSongSplit[1] });
+			return;
 		}
 		winston.info("HollowEarthScraper could not find song");
-		return callback(null, { Artist: null, Track: null });
+		callback(null, { Artist: null, Track: null });
 	}
 }

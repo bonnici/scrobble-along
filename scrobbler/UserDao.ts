@@ -17,21 +17,21 @@ export interface UserDao {
 export class DummyUserDao implements UserDao {
 	getUsersListeningToStation(station:string, callback:(err, users:u.User[]) => void): void {
 		if (station == "Station1") {
-			return callback(null, [
+			callback(null, [
 				{ UserName: "User1", Session: "" },
 				{ UserName: "User2", Session: "" },
 				{ UserName: "User3", Session: "" }
 			]);
 		}
 		else {
-			return callback(null, [
+			callback(null, [
 				{ UserName: "User2", Session: "" }
 			]);
 		}
 	}
 
 	incrementUserScrobble(listener: string, station: string, callback:(err, string) => void): void {
-		return callback(null, "ok");
+		callback(null, "ok");
 	}
 }
 

@@ -121,7 +121,6 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-check return after callbacks
 about page
 better layout
 if session does not find user, clear cookie and refresh

@@ -12,7 +12,7 @@ var DummyStationDao = (function () {
     function DummyStationDao() {
     }
     DummyStationDao.prototype.getStations = function (callback) {
-        return callback(null, [
+        callback(null, [
             { StationName: "Station1", ScraperName: "Scraper1", Session: "" },
             { StationName: "Station1", ScraperName: "Scraper2", Session: "" },
             { StationName: "Station1", ScraperName: "Scraper1", Session: "" }
@@ -30,7 +30,8 @@ var MongoStationDao = (function () {
     MongoStationDao.prototype.getStations = function (callback) {
         var _this = this;
         if (!this.dbClient || !this.crypter) {
-            return callback("Invalid DAO setup", null);
+            callback("Invalid DAO setup", null);
+            return;
         }
 
         this.dbClient.collection('station', function (error, collection) {

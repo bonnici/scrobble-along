@@ -24,7 +24,7 @@ var MongoDao = (function () {
 				function (error, object) {
 					if (error) {
 						var message = "Could not update session of user " + username + ": " + error.message;
-						return callback(message, null);
+						callback(message, null);
 					}
 					else {
 						callback(null, "ok");
@@ -81,10 +81,10 @@ var MongoDao = (function () {
 					if (error) {
 						var message = "Could not update listening of user " + username + ": " + error.message;
 						winston.error(message);
-						return callback(error, null);
+						callback(error, null);
 					}
 					else {
-						return callback(null, "ok");
+						callback(null, "ok");
 					}
 				});
 		});

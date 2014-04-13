@@ -30,7 +30,8 @@ export class WzbcScraper extends scrap.Scraper {
 	private parseHtml(body: string, callback: (err, song:song.Song) => void): void {
 		if (!body) {
 			winston.warn("WzbcScraper: No HTML body");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		var $ = cheerio.load(body);
@@ -39,7 +40,8 @@ export class WzbcScraper extends scrap.Scraper {
 
 		if (playlistRows.length < 1) {
 			winston.info("WzbcScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		var artist = playlistRows.first().find('span.aw').text();
@@ -47,7 +49,8 @@ export class WzbcScraper extends scrap.Scraper {
 
 		if (!artist || !song) {
 			winston.info("WzbcScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
+			return;
 		}
 
 		artist = artist.trim();
@@ -55,11 +58,11 @@ export class WzbcScraper extends scrap.Scraper {
 
 		if (!artist || !song) {
 			winston.info("WzbcScraper could not find song");
-			return callback(null, { Artist: null, Track: null });
+			callback(null, { Artist: null, Track: null });
 		}
 		else {
 			winston.info("WzbcScraper found song " + artist + " - " + song);
-			return callback(null, { Artist: artist, Track: song });
+			callback(null, { Artist: artist, Track: song });
 		}
 	}
 }

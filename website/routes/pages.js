@@ -64,7 +64,7 @@ exports.login = function(req, res) {
 				//todo send message to user?
 			}
 			else {
-				res.cookie('lastfmSession', encrpytedSession, { maxAge: 365*24*60*60*1000 }); // max age = 1 year
+				res.cookie('lastfmSession', encrpytedSession, { maxAge: 30*24*60*60*1000 }); // max age = 30 days
 				winston.info("Successfully stored session for user " + session.user)
 			}
 			res.redirect("/"); //todo disable 304?
