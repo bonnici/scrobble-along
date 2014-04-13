@@ -88,6 +88,7 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	// Routes
 
 	app.get('/', pages.index);
+	app.get('/about', pages.about);
 	app.get('/admin', pages.admin);
 	app.get('/login', pages.login);
 	app.get('/logout', pages.logout);
@@ -121,7 +122,6 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-about page
 better layout
 if session does not find user, clear cookie and refresh
 cache lastfm/mongo calls

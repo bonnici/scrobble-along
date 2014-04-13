@@ -1,0 +1,57 @@
+extends layout
+
+block body
+	div.container
+
+		h3 What's all this about then?
+		#general-info
+			| A while ago now I was listening to my favorite radio station and I heard a new song I really liked, but I didn't get to hear its name
+			| and by the time I got to check their site it was too late to see what it was. I thought it would be really nice if the station had
+			| a last.fm account, so I could go back and see what they were playing back then, and I'd also be able to easily see what songs they
+			| were playing the most and what my compatibility was with them. I figured that was something I could set up, so I made a little script
+			| that would occasionally check their site and post what they were playing to last.fm. After that started running, I thought it would be
+			| pretty nice if I could also post those songs to last.fm while I was listening to the station, so I modified the script a bit and started
+			| running it on my computer when I was listening. After I had added a few more stations, and those last.fm accounts started getting lots of
+			| friends, I realized that other people might also want to scrobble along with them, so I converted the script to a website, and here we are!
+
+		h3 How do I use it?
+		#general-info
+			| Log in, then click the green "Scrobble Along" button on the station that you want to scrobble along with. When you want to stop, click the
+			| "Stop Scrobbling" button.
+
+		h3 How can I contact you or keep up with the latest news?
+		#contact
+			| Last.fm is the best way for both. I'm <a href="http://www.last.fm/user/esemarte">esemarte</a> on there, so sending me a
+			| <a href="http://www.last.fm/inbox/compose?to=esemarte">message</a> or a
+			| shout will get my attention. If you don't have an account or don't want to use last.fm to contact me, you can send me an
+			| <a href="mailto:scrobblealong@gmail.com">email</a> but I might not keep a close eye on that inbox. To keep up to date with any news or
+			| updates, check the <a href="http://www.last.fm/group/ScrobbleAlong">last.fm group I made for the site</a>.
+
+		h3 When I log in do I need to give you my last.fm password?
+		#login-info
+			| No, I never see your login details. Authentication and security is handled by last.fm, as long as you are logged in there you just
+			| need to tell last.fm that you are giving this site permission to scrobble on your behalf. Even though I use last.fm for authentication,
+			| it doesn't mean that you need to stay logged in to last.fm to keep scrobbling, once you give permission to this site it works
+			| independently, so you can log out of last.fm and stay logged in to ScrobbleAlong, or you can log out of ScrobbleAlong and stay logged in
+			| to last.fm. It also means that if you ever change your mind and want to stop ScrobbleAlong from doing anything to your last.fm account,
+			| you can go to your account settings at last.fm and remove the site from your <a href="http://www.last.fm/settings/applications">connected
+			| applications</a>.
+
+		h3 Are you affiliated with the stations?
+		#stations
+			| No, not at all, I don't work for them and don't have any influence over what they play, this is entirely unofficial. In fact, I don't even
+			| own some of the last.fm accounts of the stations I'm displaying, so I can't do anything if they stop working for some reason. The stations that
+			| I don't manage personally are: somaillstreet, somadronezone, somaspacestn, somasecretagent, somagroovesalad, somabagel, somasonicunivrs,
+			| somadigitalis, bbcradio1, bbc1xtra, bbcradio2, bbc6music, seriousradio, absoluteradio, absolute60s, absolute70s, absolute80s, absolute90s,
+			| absolute00s, absoluteclassic, and mutant_radio.
+
+		//-  h3 Can you add another station for me?
+		//-  #add-station
+		//-    | Probably! I'll only be able to add a new station if there is some way
+		//-    | for me to figure out what the station is currently playing, if you can see that somewhere on their website then give me those details
+		//-    | and I'll see what I can do. If the station already has a last.fm account, adding it very easy so just send me the last.fm account name.
+
+		h3 How does this all work?
+		#technical-details
+			| If you want more technical details about how all this works, check out my
+			| <a href="http://holtcode.blogspot.com/2013/06/scrobblealong.html">blog post</a>.

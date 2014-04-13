@@ -14,6 +14,10 @@ exports.index = function(req, res) {
 	res.render('index');
 };
 
+exports.about = function(req, res) {
+	res.render('about');
+};
+
 exports.admin = function(req, res) {
 	var encryptedSession = req.cookies['lastfmSession'];
 	if (!encryptedSession) {
