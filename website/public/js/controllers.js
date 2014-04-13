@@ -4,7 +4,7 @@
 
 angular.module('scrobbleAlong.controllers', []).
 
-	controller('MenuCtrl', ['$scope', '$cookies', 'api', function($scope, $cookies, api) {
+	controller('LoginCtrl', ['$scope', '$cookies', 'api', function($scope, $cookies, api) {
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
 
 		api.getLoginUrl(function(url) {
@@ -81,13 +81,6 @@ angular.module('scrobbleAlong.controllers', []).
 				$interval(function() { updateStationRecentTracks(); }, 20 * 1000);
 			});
 		};
-
-		$scope.loggedIn = $cookies.lastfmSession ? true : false;
-
-		//todo use MenuCtrl scope somehow?
-		api.getLoginUrl(function(url) {
-			$scope.loginUrl = url;
-		});
 
 		//todo change this to use promises?
 		api.getUserDetails(function(userDetails) {

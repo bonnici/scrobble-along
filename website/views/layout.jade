@@ -2,26 +2,33 @@ doctype html
 html(lang="en", data-ng-app="scrobbleAlong")
 	head
 		meta(charset='utf8')
-		title Angular Express Seed App
+		meta(http-equiv='X-UA-Compatible', content='IE=edge')
+		meta(name='viewport', content='width=device-width, initial-scale=1')
+		title Scrobble Along
+		link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css')
+		//- link(rel='stylesheet', href='//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css')
 		link(rel='stylesheet', href='/css/app.css')
-	body
-		div(data-ng-controller='MenuCtrl')
-			ul
-				li
-					a(href='/') ScrobbleAlong
-				li
-					a(href='/about') About
-				li
-					a(href='/about#contact') Contact
-				li(data-ng-if='loggedIn')
-					a(href='/logout') Logout
-				li(data-ng-if='!loggedIn')
-					a(href='{{loginUrl}}') Login
+
+	body(data-ng-controller='LoginCtrl')
+		ul
+			li
+				a(href='/') Scrobble Along
+			li
+				a(href='/about') About
+			li
+				a(href='/about#contact') Contact
+			li(data-ng-if='loggedIn')
+				a(href='/logout') Logout
+			li(data-ng-if='!loggedIn')
+				a(href='{{loginUrl}}') Login
 
 
 		block body
 
-		script(src='js/lib/angular/angular.js')
+		script(src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js')
+		script(src='//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js')
+		script(src='https://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js')
+		//- script(src='js/lib/angular/angular.js')
 		script(src='js/lib/angular/angular-cookies.js')
 		script(src='js/app.js')
 		script(src='js/services.js')
