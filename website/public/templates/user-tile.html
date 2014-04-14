@@ -1,5 +1,19 @@
-<ul data-ng-if="userDetails">
-	<li>Logged in as {{userDetails.lastfmUsername}}</li>
-	<li><img data-ng-src="{{userDetails.lastfmProfileImage}}"></li>
-	<li><a href="/logout">Logout</a></li>
-</ul>
+<div class="logged-in-as">
+	<div class="lastfm-tile lastfm-tile-user">
+		<div class="name-image-buttons">
+			<div class="username">
+				<p>
+					Logged in as
+					<br>
+					<a href="http://www.last.fm/user/{{userDetails.lastfmUsername}}" target="_blank">{{userDetails.lastfmUsername}}</a>
+				</p>
+			</div>
+			<div class="image">
+				<img width="114px" data-ng-src="{{userDetails.lastfmProfileImage}}">
+			</div>
+			<div class="buttons">
+				<button class="btn btn-xs btn-danger" data-ng-click="logoutModal()">Logout</button>
+			</div>
+		</div>
+	</div>
+</div>

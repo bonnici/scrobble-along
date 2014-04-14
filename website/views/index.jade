@@ -2,28 +2,34 @@ extends layout
 
 block body
 	div(data-ng-controller='IndexCtrl')
-		div(data-ng-if='loggedIn')
-			div(user-tile)
-			div(data-ng-repeat='station in stations | filter:{currentlyScrobbling:true}', station-tile)
 
-		div(data-ng-if='!loggedIn')
-			h3 Scrobble Along with the radio
-			p.
+		div.jumbotron(data-ng-if='!loggedIn')
+			h2.text-center Scrobble Along
+			p.text-center.
 				Have you ever been listening to a radio station and wished there was a way to scrobble those songs?
-				Now you can! Log in with your Last.fm account and select a station below, and you will scrobble what
-				they play. For more information about how this works and how to get in touch, check out the about page.
-			a(href='{{loginUrl}}') Login
+				Now you can! Log in with your Last.fm account and select a station below, and you will scrobble along
+				with what they play. For more information about how this works and how to get in touch, see the
+				<a href="about">about</a> page.
+			p.text-center
+				a.btn.btn-primary.btn-lg(href='{{loginUrl}}') Log In With Last.fm
 
-		p(data-ng-if='loggedIn') Sort by:
-			ul
-				li
-					a(href='', data-ng-click='sortStationsBy = "lastfmUsername"') Name
-					span(data-ng-if='sortStationsBy == "lastfmUsername"')  (selected)
-				li
-					a(href='', data-ng-click='sortStationsBy = "scrobbles"') Scrobbles
-					span(data-ng-if='sortStationsBy == "scrobbles"')  (selected)
-				li
-					a(href='', data-ng-click='sortStationsBy = "compatibility"') Compatibility
-					span(data-ng-if='sortStationsBy == "compatibility"')  (selected)
+		div(data-ng-if='loggedIn')
+			div#user-info
+				div.user-tile(user-tile)
+				div.station-tile(data-ng-repeat='station in stations | filter:{currentlyScrobbling:true}', station-tile)
+				p#continue-scrobbling-note Note: ScrobbleAlong will continue scrobbling even if you close your browser window.
 
-		div(data-ng-repeat='station in stations | filter:{currentlyScrobbling:false} | orderBy:sortStations', station-tile)
+		div(data-ng-if='loggedIn')
+			div.pull-left
+				h3 Stations
+			div.btn-group.btn-group-sm.pull-right.sort-buttons
+				button.btn.btn-default.disabled(type='button') Sort:
+				button.btn.btn-default(type='button', data-ng-click='changeStationSort("scrobbles")', ng-class='{active: sortStationsBy=="scrobbles"}') Scrobbles
+				button.btn.btn-default(type='button', data-ng-click='changeStationSort("compatibility")', ng-class='{active: sortStationsBy=="compatibility"}') Compatibility
+				button.btn.btn-default(type='button', data-ng-click='changeStationSort("lastfmUsername")', ng-class='{active: sortStationsBy=="lastfmUsername"}') Name
+
+		div.clearfix
+
+		div.well.stations
+			div.station-tile(data-ng-repeat='station in stations | filter:{currentlyScrobbling:false} | orderBy:sortStations', station-tile)
+			div.clearfix

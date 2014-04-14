@@ -41,7 +41,7 @@ block body
 
 		div Username / Listening / Session
 
-		div(data-ng-repeat='user in userDetails | orderBy:sortUsers')
+		div(data-ng-repeat='user in allUserDetails | orderBy:sortUsers')
 			input(type='text', data-ng-model='user["_id"]', disabled)
 			input(type='text', data-ng-model='user.listening', disabled)
 			input(type='text', data-ng-model='user.session', disabled)

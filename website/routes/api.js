@@ -151,7 +151,7 @@ exports.stationLastfmInfo = function(req, res) {
 				}
 
 				for (var i=0; i < tasteometerData.length; i++) {
-					tasteometerResults[tasteometerData[i].user2] = results[i];
+					tasteometerResults[tasteometerData[i].user2] = results[i] * 100; // convert to percentage
 				}
 
 				callback(null, tasteometerResults);

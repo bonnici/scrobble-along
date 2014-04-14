@@ -4,16 +4,35 @@
 
 angular.module('scrobbleAlong.controllers', []).
 
-	controller('LoginCtrl', ['$scope', '$cookies', 'api', function($scope, $cookies, api) {
+	controller('LoginCtrl', ['$scope', '$cookies', '$window', 'api', function($scope, $cookies, $window, api) {
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
+		$scope.userDetails = { isScrobbling: false };
 
 		api.getLoginUrl(function(url) {
 			$scope.loginUrl = url;
 		});
+
+		$scope.login = function() {
+			if ($scope.loginUrl) {
+				$window.location.href = $scope.loginUrl;
+			}
+		}
+
+		$scope.logoutModal = function() {
+			if ($scope.userDetails.isScrobbling) {
+				//$window.alert("modal here");
+				$('#logout-modal').modal();
+			}
+			else {
+				$window.location.href = '/logout';
+			}
+		};
 	}]).
 
 	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', '$timeout', 'api',
 		function ($scope, $http, $cookies, $interval, $timeout, api) {
+
+		$scope.stations = [];
 
 		// Updates the recent track names & images of a batch of stations and continues until all are loaded
 		var updateStationRecentTracksBatch = function(stationNames, batchSize) {
@@ -82,9 +101,10 @@ angular.module('scrobbleAlong.controllers', []).
 			});
 		};
 
+
 		//todo change this to use promises?
 		api.getUserDetails(function(userDetails) {
-			$scope.userDetails = { lastfmUsername: userDetails.lastfmUsername };
+			$scope.userDetails.lastfmUsername = userDetails.lastfmUsername;
 			var userListeningTo = userDetails.listeningTo;
 			var userScrobbles = userDetails.userScrobbles || {};
 
@@ -106,6 +126,7 @@ angular.module('scrobbleAlong.controllers', []).
 
 					if (station.lastfmUsername == userListeningTo) {
 						station.currentlyScrobbling = true;
+						$scope.userDetails.isScrobbling = true;
 					}
 				});
 
@@ -114,7 +135,11 @@ angular.module('scrobbleAlong.controllers', []).
 		});
 
 		// Sorting of stations
-		$scope.sortStationsBy = 'lastfmUsername';
+		$scope.changeStationSort = function(sort) {
+			console.log("sortStationsBy", sort);
+			$scope.sortStationsBy = sort;
+		};
+		$scope.sortStationsBy = $scope.loggedIn ? 'scrobbles' : 'lastfmUsername';
 		$scope.sortStations = function(station) {
 			if ($scope.sortStationsBy == 'scrobbles') {
 				return station.userScrobbles * -1;
@@ -128,8 +153,15 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		var setCurrentlyScrobbling = function(scrobblingStation) {
+			$scope.userDetails.isScrobbling = false;
 			angular.forEach($scope.stations, function(curStation) {
-				curStation.currentlyScrobbling = (curStation == scrobblingStation);
+				if (curStation == scrobblingStation) {
+					$scope.userDetails.isScrobbling = true;
+					curStation.currentlyScrobbling = true;
+				}
+				else {
+					curStation.currentlyScrobbling = false
+				}
 			});
 		}
 
@@ -171,11 +203,11 @@ angular.module('scrobbleAlong.controllers', []).
 
 		var loadUsers = function() {
 			api.getAllUsers(function(userDetails) {
-				$scope.userDetails = userDetails;
+				$scope.allUserDetails = userDetails;
 
 				$scope.numUsers = 0;
 				$scope.numUsersScrobbling = 0;
-				angular.forEach($scope.userDetails, function(user) {
+				angular.forEach($scope.allUserDetails, function(user) {
 					$scope.numUsers++;
 					if (user.listening) {
 						$scope.numUsersScrobbling++;
@@ -275,7 +307,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		$scope.clearAllUserListening = function() {
-			var userDetails = $scope.userDetails.slice(0);
+			var userDetails = $scope.allUserDetails.slice(0);
 			doClearAllUserListening(userDetails, function() {
 				loadUsers();
 			});
@@ -300,7 +332,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		$scope.clearAllUserSessions = function() {
-			var userDetails = $scope.userDetails.slice(0);
+			var userDetails = $scope.allUserDetails.slice(0);
 			doClearAllUserSessions(userDetails, function() {
 				loadUsers();
 			});

@@ -1,21 +1,47 @@
-<ul>
-	<li>{{station.lastfmUsername}} <a href="{{station.stationUrl}}">Station</a> <a href="{{station.streamUrl}}">Stream</a></li>
-	<li>{{station.userScrobbles}}</li>
-	<li>{{station.tasteometer}}</li>
-	<li><img data-ng-src="{{station.lastfmProfileImage}}"></li>
-	<li>
-		<ul>
-			<li data-ng-repeat="track in station.recentTracks">
-				<a href="{{track.url}}">{{track.artist}} - {{track.name}}</a>
-				<span data-ng-if="track.nowPlaying">(now playing)</span>
-				<img data-ng-src="{{track.image}}">
-			</li>
-		</ul>
-	</li>
-	<li data-ng-if="!station.currentlyScrobbling">
-		<button data-ng-click="scrobbleAlong(station)">Scrobble Along</button>
-	</li>
-	<li data-ng-if="station.currentlyScrobbling">
-		<button data-ng-click="stopScrobbling(station)">Stop Scrobbling</button>
-	</li>
-</ul>
+<div class="lastfm-tile lastfm-tile-station">
+	<div class="name-image-buttons">
+		<div class="username">
+			<p><a href="http://www.last.fm/user/{{station.lastfmUsername}}" target="_blank">{{station.lastfmUsername}}</a></p>
+		</div>
+		<div class="image">
+			<img width="114px" data-ng-src="{{station.lastfmProfileImage}}">
+		</div>
+		<div class="buttons">
+			<button data-ng-if="!station.currentlyScrobbling" class="btn btn-xs btn-success" data-ng-click="scrobbleAlong(station)">Scrobble Along</button>
+			<button data-ng-if="station.currentlyScrobbling" class="btn btn-xs btn-default" data-ng-click="stopScrobbling(station)">Stop Scrobbling</button>
+		</div>
+	</div>
+	<div class="station-info">
+		<div class="general-info">
+			<p>
+				<a href="{{station.stationUrl}}" target="_blank">Website</a> ·
+				<a href="{{station.streamUrl}}" target="_blank">Stream</a>
+			</p>
+		</div>
+		<div class="compatibility" data-ng-if="loggedIn">
+			Compatibility
+			<div class="tasteometer">
+				<span class="bar" style="width: {{station.tasteometer}}%;"></span>
+			</div>
+		</div>
+		<div class="recent-tracks">
+			Recent Tracks
+
+			<div data-ng-repeat="track in station.recentTracks | limitTo:3" class="track-row">
+				<div class="track-image">
+					<a href="{{track.url}}" target="_blank"><img data-ng-src="{{track.image}}"></a>
+				</div>
+				<div class="track-name">
+					<a href="{{track.url}}" target="_blank" title="{{track.artist}} - {{track.name}}">
+						{{track.artist}}
+						<br>
+						{{track.name}}
+					</a>
+				</div>
+				<div data-ng-if="track.nowPlaying" class="now-playing" style="visibility: visible;">
+					<img src="/img/nowplaying.gif" title="Now Playing">
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
