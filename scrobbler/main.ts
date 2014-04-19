@@ -257,7 +257,8 @@ var usersListening:{[index: string]:usr.User[]} = {
 };
 
 var lastFmDao = new lfmDao.DummyLastFmDao();
-var scrobbler = new scrob.Scrobbler(lastFmDao);
+var userDao = new usrDao.DummyUserDao();
+var scrobbler = new scrob.Scrobbler(lastFmDao, userDao);
 
 setInterval(() => { testScrapeAndScrobble(); }, interval);
 testScrapeAndScrobble();
