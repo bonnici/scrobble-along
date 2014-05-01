@@ -33,6 +33,8 @@ var JsonScraper = (function (_super) {
                 return;
             }
 
+            body = _this.preprocessBody(body);
+
             try  {
                 var json = JSON.parse(body);
             } catch (e) {
@@ -64,6 +66,10 @@ var JsonScraper = (function (_super) {
 
     JsonScraper.prototype.extractJustPlayedSong = function (jsonData) {
         return null;
+    };
+
+    JsonScraper.prototype.preprocessBody = function (body) {
+        return body;
     };
     return JsonScraper;
 })(scrap.Scraper);

@@ -28,6 +28,8 @@ export class JsonScraper extends scrap.Scraper {
 				return;
 			}
 
+			body = this.preprocessBody(body);
+
 			try {
 				var json = JSON.parse(body);
 			}
@@ -61,5 +63,9 @@ export class JsonScraper extends scrap.Scraper {
 
 	extractJustPlayedSong(jsonData:any): song.Song {
 		return null;
+	}
+
+	preprocessBody(body: string):string {
+		return body;
 	}
 }
