@@ -44,6 +44,7 @@ import mediaStream = require("./scrapers/MediaStreamScraper");
 import newtown = require("./scrapers/NewtownRadioScraper");
 import radio2Nl = require("./scrapers/Radio2NLScraper");
 import kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
+import doubleJ = require("./scrapers/DoubleJScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -97,6 +98,7 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	FUVAllMusic: new wfuv.WfuvScraper("FUVAllMusic", "hd2"),
 	AlternateSide: new wfuv.WfuvScraper("AlternateSide", "hd3"),
 	DigMusic: new digMusic.DigMusicScraper("DigMusic"),
+	DoubleJ: new doubleJ.DoubleJScraper("DoubleJ"),
 	WZBC: new wzbc.WzbcScraper("WZBC"),
 	PlayFM: new playFm.PlayFmScraper("PlayFM"),
 	ABCJazz: new digMusic.DigMusicScraper("ABCJazz", "http://abcjazz.net.au/player-data.php"),
@@ -187,6 +189,7 @@ setInterval(
 //////////////
 // Scrobbler that scrapes but does not scrobble and uses fake stations & users
 //////////////
+
 /*
 var stations = [
 	{ StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
@@ -210,7 +213,7 @@ var stations = [
 	{ StationName: "WFUV", ScraperName: "WFUV", Session: "WFUVSession" },
 	{ StationName: "FUVAllMusic", ScraperName: "FUVAllMusic", Session: "FUVAllMusicSession" },
 	{ StationName: "AlternateSide", ScraperName: "AlternateSide", Session: "AlternateSideSession" },
-	{ StationName: "DigMusic", ScraperName: "DigMusic", Session: "DigMusicSession" },
+	//{ StationName: "DigMusic", ScraperName: "DigMusic", Session: "DigMusicSession" },
 	{ StationName: "WZBC", ScraperName: "WZBC", Session: "WZBCSession" },
 	{ StationName: "PlayFM", ScraperName: "PlayFM", Session: "PlayFMSession" },
 	{ StationName: "ABCJazz", ScraperName: "ABCJazz", Session: "ABCJazzSession" },
@@ -243,7 +246,8 @@ var stations = [
 	{ StationName: "NewtownRadio", ScraperName: "NewtownRadio", Session: "NewtownRadioSession" },
 	{ StationName: "Radio2NL", ScraperName: "Radio2NL", Session: "Radio2NLSession" },
 	{ StationName: "Air1", ScraperName: "Air1", Session: "Air1Session" },
-	{ StationName: "KLove", ScraperName: "KLove", Session: "KLoveSession" }
+	{ StationName: "KLove", ScraperName: "KLove", Session: "KLoveSession" },
+	{ StationName: "doublejradio", ScraperName: "DoubleJ", Session: "DoubleJSession" }
 ];
 
 var usersListening:{[index: string]:usr.User[]} = {
@@ -257,7 +261,8 @@ var usersListening:{[index: string]:usr.User[]} = {
 };
 
 var lastFmDao = new lfmDao.DummyLastFmDao();
-var scrobbler = new scrob.Scrobbler(lastFmDao);
+var userDao = new usrDao.DummyUserDao();
+var scrobbler = new scrob.Scrobbler(lastFmDao, userDao);
 
 setInterval(() => { testScrapeAndScrobble(); }, interval);
 testScrapeAndScrobble();

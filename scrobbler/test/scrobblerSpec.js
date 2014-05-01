@@ -1,6 +1,6 @@
 /// <reference path="../../definitions/DefinitelyTyped/jasmine/jasmine.d.ts"/>
 
-
+var assert = require("assert");
 
 var scrap = require("../scrapers/Scraper");
 var scrob = require("../Scrobbler");

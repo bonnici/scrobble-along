@@ -43,6 +43,7 @@ var mediaStream = require("./scrapers/MediaStreamScraper");
 var newtown = require("./scrapers/NewtownRadioScraper");
 var radio2Nl = require("./scrapers/Radio2NLScraper");
 var kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
+var doubleJ = require("./scrapers/DoubleJScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -94,6 +95,7 @@ var scrapers = {
     FUVAllMusic: new wfuv.WfuvScraper("FUVAllMusic", "hd2"),
     AlternateSide: new wfuv.WfuvScraper("AlternateSide", "hd3"),
     DigMusic: new digMusic.DigMusicScraper("DigMusic"),
+    DoubleJ: new doubleJ.DoubleJScraper("DoubleJ"),
     WZBC: new wzbc.WzbcScraper("WZBC"),
     PlayFM: new playFm.PlayFmScraper("PlayFM"),
     ABCJazz: new digMusic.DigMusicScraper("ABCJazz", "http://abcjazz.net.au/player-data.php"),
