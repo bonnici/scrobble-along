@@ -115,7 +115,8 @@ var scrapers = {
     Amazing: new amazing.AmazingRadioScraper("Amazing"),
     WFMUDrummer: new wfmu.WfmuScraper("WFMUDrummer", "4"),
     WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
-    WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7")
+    WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7"),
+    WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8")
 };
 
 //////////////
