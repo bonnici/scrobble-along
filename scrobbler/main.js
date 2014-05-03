@@ -44,6 +44,7 @@ var newtown = require("./scrapers/NewtownRadioScraper");
 var radio2Nl = require("./scrapers/Radio2NLScraper");
 var kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
 var doubleJ = require("./scrapers/DoubleJScraper");
+var amazing = require("./scrapers/AmazingRadioScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -108,7 +109,13 @@ var scrapers = {
     NewtownRadio: new newtown.NewtownRadioScraper("NewtownRadio"),
     Radio2NL: new radio2Nl.Radio2NLScraper("Radio2NL"),
     Air1: new kloveAir1.KLoveAir1RadioScraper("Air1", "2"),
-    KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1")
+    KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1"),
+    RadioGente: new mediaStream.MediaStreamScraper("RadioGente", "5075cd6f48ae3e790a000275"),
+    Molecula: new mediaStream.MediaStreamScraper("Molecula", "524097f47764d4c42c00000a"),
+    Amazing: new amazing.AmazingRadioScraper("Amazing"),
+    WFMUDrummer: new wfmu.WfmuScraper("WFMUDrummer", "4"),
+    WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
+    WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7")
 };
 
 //////////////

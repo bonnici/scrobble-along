@@ -6,15 +6,44 @@ import song = require("../Song");
 import winston = require("winston");
 
 export class WfmuScraper extends scrap.CheerioScraper {
-	constructor(name:string) {
+	private baseUrl:string;
+	private channel:string;
+
+	constructor(name:string, channel?:string) {
 		super(name);
+		this.channel = channel || "1";
+		this.baseUrl = "http://www.wfmu.org/currentliveshows.php?xml=1&c=";
 	}
 
 	public getUrl(): string {
-		return "http://wfmu.org/currentliveshows_aggregator.php?ch=1";
+		return this.baseUrl + this.channel + "&_=" + new Date().getTime();
 	}
 
 	public parseCheerio($:any, callback: (err, newNowPlayingSong: song.Song, justScrobbledSong?:song.Song) => void): void {
+
+		var songElem = $('live title');
+		var artistElem = $('live artist');
+
+		if (songElem.length > 0) {
+			var songText = songElem.eq(0).text().trim();
+		}
+		if (artistElem.length > 0) {
+			var artistText = artistElem.eq(0).text().trim();
+		}
+
+		if (songText && !artistText) {
+			// Special case - song and artist inside song elem
+			var dashIndex = songText.indexOf(" - ");
+			artistText = songText.substr(0, dashIndex);
+			songText = songText.substr(dashIndex + 3);
+		}
+
+		if (songText && artistText) {
+			callback(null, { Artist: artistText, Track: songText });
+		}
+		else {
+			callback(null, { Artist: null, Track: null });
+		}
 		/*
 		 Example (cutdown):
 
@@ -35,6 +64,7 @@ export class WfmuScraper extends scrap.CheerioScraper {
 		 </div>
 		 */
 
+		/*
 		var songDiv = $('div#nowplaysong div#nowplaying div.bigline');
 
 		if (songDiv.length < 1) {
@@ -81,5 +111,6 @@ export class WfmuScraper extends scrap.CheerioScraper {
 			winston.info("WfmuScraper could not find song");
 			callback(null, { Artist: null, Track: null });
 		}
+		*/
 	}
 }

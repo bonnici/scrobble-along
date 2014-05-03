@@ -45,6 +45,7 @@ import newtown = require("./scrapers/NewtownRadioScraper");
 import radio2Nl = require("./scrapers/Radio2NLScraper");
 import kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
 import doubleJ = require("./scrapers/DoubleJScraper");
+import amazing = require("./scrapers/AmazingRadioScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -111,7 +112,13 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	NewtownRadio: new newtown.NewtownRadioScraper("NewtownRadio"),
 	Radio2NL: new radio2Nl.Radio2NLScraper("Radio2NL"),
 	Air1: new kloveAir1.KLoveAir1RadioScraper("Air1", "2"),
-	KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1")
+	KLove: new kloveAir1.KLoveAir1RadioScraper("KLove", "1"),
+	RadioGente: new mediaStream.MediaStreamScraper("RadioGente", "5075cd6f48ae3e790a000275"),
+	Molecula: new mediaStream.MediaStreamScraper("Molecula", "524097f47764d4c42c00000a"),
+	Amazing: new amazing.AmazingRadioScraper("Amazing"),
+	WFMUDrummer: new wfmu.WfmuScraper("WFMUDrummer", "4"),
+	WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
+	WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7")
 };
 
 //////////////
@@ -247,7 +254,13 @@ var stations = [
 	{ StationName: "Radio2NL", ScraperName: "Radio2NL", Session: "Radio2NLSession" },
 	{ StationName: "Air1", ScraperName: "Air1", Session: "Air1Session" },
 	{ StationName: "KLove", ScraperName: "KLove", Session: "KLoveSession" },
-	{ StationName: "doublejradio", ScraperName: "DoubleJ", Session: "DoubleJSession" }
+	{ StationName: "doublejradio", ScraperName: "DoubleJ", Session: "DoubleJSession" },
+	{ StationName: "RadioGente", ScraperName: "RadioGente", Session: "RadioGenteSession" },
+	{ StationName: "MoleculaCL", ScraperName: "Molecula", Session: "MoleculaSession" },
+	{ StationName: "AmazingRadio", ScraperName: "Amazing", Session: "AmazingRadioSession" },
+	{ StationName: "WFMUDrummer", ScraperName: "WFMUDrummer", Session: "WFMUDrummerSession" },
+	{ StationName: "WFMUIchiban", ScraperName: "WFMUIchiban", Session: "WFMUIchibanSession" },
+	{ StationName: "WFMUUbu", ScraperName: "WFMUUbu", Session: "WFMUUbuSession" }
 ];
 
 var usersListening:{[index: string]:usr.User[]} = {
