@@ -119,12 +119,14 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	WFMUDrummer: new wfmu.WfmuScraper("WFMUDrummer", "4"),
 	WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
 	WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7"),
-	WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8")
+	WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8"),
+	Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9")
 };
 
 //////////////
 // Proper scrobbler
 //////////////
+
 var lastfmNode = new lastfm.LastFmNode({
 	api_key: LASTFM_API_KEY,
 	secret: LASTFM_SECRET,
@@ -261,7 +263,9 @@ var stations = [
 	{ StationName: "AmazingRadio", ScraperName: "Amazing", Session: "AmazingRadioSession" },
 	{ StationName: "WFMUDrummer", ScraperName: "WFMUDrummer", Session: "WFMUDrummerSession" },
 	{ StationName: "WFMUIchiban", ScraperName: "WFMUIchiban", Session: "WFMUIchibanSession" },
-	{ StationName: "WFMUUbu", ScraperName: "WFMUUbu", Session: "WFMUUbuSession" }
+	{ StationName: "WFMUUbu", ScraperName: "WFMUUbu", Session: "WFMUUbuSession" },
+	{ StationName: "doublejradio", ScraperName: "DoubleJ", Session: "DoubleJSession" },
+	{ StationName: "sonarfm", ScraperName: "Sonar", Session: "SonarSession" }
 ];
 
 var usersListening:{[index: string]:usr.User[]} = {

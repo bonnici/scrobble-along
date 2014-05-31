@@ -116,7 +116,8 @@ var scrapers = {
     WFMUDrummer: new wfmu.WfmuScraper("WFMUDrummer", "4"),
     WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
     WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7"),
-    WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8")
+    WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8"),
+    Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9")
 };
 
 //////////////
