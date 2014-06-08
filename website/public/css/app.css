@@ -23,6 +23,11 @@ body {
 	border-radius: 5px;
 }
 
+.lastfm-tile .ng-hide {
+	visibility: hidden !important;
+	display:block !important;
+}
+
 .lastfm-tile-station {
 	width: 270px;
 }
@@ -55,6 +60,10 @@ body {
 	height: 120px;
 	overflow: hidden;
 	padding-top: 5px;
+}
+
+.lastfm-tile .image .loading {
+	padding-top: 40px;
 }
 
 .lastfm-tile .buttons {
@@ -95,6 +104,9 @@ body {
 	text-align: center;
 }
 
+.lastfm-tile .station-info .recent-tracks .loading {
+	padding-top: 40px;
+}
 
 .lastfm-tile .station-info .recent-tracks .track-row {
 	height: 30px;

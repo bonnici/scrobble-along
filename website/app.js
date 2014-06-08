@@ -123,21 +123,15 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-if session does not find user, clear cookie and refresh
 cache lastfm/mongo calls
-minification
 better server-side error logs
 show some errors to user
 fix memory leak?
-recover from latest track errors better (keep trying other stations)
 change hrefs to ng-href?
 animation for station transitions
-loading indicators
-placeholder images
-tasteometer hover for percentage
-disable angular logs in production
 stop angular from popping things in and out (e.g. logout button)
-sort should use name if there are no scrobbles or tasteometer
+
+disable angular logs in production
+minification
 time out scrobbling
-new stations
- */
+*/

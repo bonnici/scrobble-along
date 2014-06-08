@@ -28,8 +28,8 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 	}]).
 
-	controller('IndexCtrl', ['$scope', '$timeout', 'userManagement', 'userDetails', 'stationDetails',
-		function ($scope, $timeout, userManagement, userDetailsSvc, stationDetailsSvc) {
+	controller('IndexCtrl', ['$scope', '$timeout', '$window', 'userManagement', 'userDetails', 'stationDetails',
+		function ($scope, $timeout, $window, userManagement, userDetailsSvc, stationDetailsSvc) {
 
 		$scope.stations = [];
 
@@ -51,6 +51,11 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		userDetailsSvc.getUserDbInfo(function(userDetails) {
+			if ($scope.loggedIn && (!userDetails || !userDetails.lastfmUsername)) {
+				$window.location.href = '/logout';
+				return;
+			}
+
 			$scope.userDetails.lastfmUsername = userDetails.lastfmUsername;
 			var userListeningTo = userDetails.listeningTo;
 			var userScrobbles = userDetails.userScrobbles || {};
@@ -70,7 +75,7 @@ angular.module('scrobbleAlong.controllers', []).
 				angular.forEach($scope.stations, function(station) {
 					stationNames.push(station.lastfmUsername);
 					station.userScrobbles = userScrobbles[station.lastfmUsername] || 0;
-					station.tasteometer = 0; // Initial setting so sorting works while the page is loading
+					station.tasteometer = null; // Initial setting so sorting works while the page is loading
 					station.currentlyScrobbling = false;
 
 					if (userListeningTo && station.lastfmUsername == userListeningTo) {
@@ -90,7 +95,9 @@ angular.module('scrobbleAlong.controllers', []).
 				stationDetailsSvc.getStationsTasteometer(stationNames, $scope.userDetails.lastfmUsername, function(stationsTasteometer) {
 					if (stationsTasteometer) {
 						angular.forEach($scope.stations, function(station) {
-							station.tasteometer = stationsTasteometer[station.lastfmUsername] || 0;
+							if (station.lastfmUsername in stationsTasteometer) {
+								station.tasteometer = stationsTasteometer[station.lastfmUsername] || 0;
+							}
 						});
 					}
 				});
@@ -106,7 +113,8 @@ angular.module('scrobbleAlong.controllers', []).
 		$scope.sortStationsBy = $scope.loggedIn ? 'scrobbles' : 'lastfmUsername';
 		$scope.sortStations = function(station) {
 			if ($scope.sortStationsBy == 'scrobbles') {
-				return station.userScrobbles * -1;
+				// Secondary sort by name
+				return station.userScrobbles ? station.userScrobbles * -1 : station.lastfmUsername;
 			}
 			else if ($scope.sortStationsBy == 'compatibility') {
 				return station.tasteometer * -1;

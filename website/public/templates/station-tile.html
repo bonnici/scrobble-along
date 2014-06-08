@@ -4,7 +4,8 @@
 			<p><a href="http://www.last.fm/user/{{station.lastfmUsername}}" target="_blank">{{station.lastfmUsername}}</a></p>
 		</div>
 		<div class="image">
-			<img width="114px" data-ng-src="{{station.lastfmProfileImage}}">
+			<img data-ng-if="station.lastfmProfileImage" width="114px" data-ng-src="{{station.lastfmProfileImage}}">
+			<img data-ng-if="!station.lastfmProfileImage" src="/img/ajax-loader.gif" class="loading">
 		</div>
 		<div class="buttons">
 			<button data-ng-if="!station.currentlyScrobbling" class="btn btn-xs btn-success" data-ng-click="scrobbleAlong(station)">Scrobble Along</button>
@@ -18,18 +19,19 @@
 				<a href="{{station.streamUrl}}" target="_blank">Stream</a>
 			</p>
 		</div>
-		<div class="compatibility" data-ng-if="loggedIn">
+		<div class="compatibility" data-ng-show="loggedIn && station.tasteometer !== null">
 			Compatibility
-			<div class="tasteometer">
-				<span class="bar" style="width: {{station.tasteometer}}%;"></span>
+			<div class="tasteometer" title="{{station.tasteometer}}%">
+				<span class="bar" style="width: {{station.tasteometer}}%;" \></span>
 			</div>
 		</div>
 		<div class="recent-tracks">
-			Recent Tracks
+			Recent Tracks <br/>
+			<img data-ng-if="!station.recentTracks" src="/img/ajax-loader.gif" class="loading">
 
 			<div data-ng-repeat="track in station.recentTracks | limitTo:3" class="track-row">
 				<div class="track-image">
-					<a href="{{track.url}}" target="_blank"><img data-ng-src="{{track.image}}"></a>
+					<a href="{{track.url}}" target="_blank"><img data-ng-src="{{track.image || '/img/album-placeholder.png'}}"></a>
 				</div>
 				<div class="track-name">
 					<a href="{{track.url}}" target="_blank" title="{{track.artist}} - {{track.name}}">

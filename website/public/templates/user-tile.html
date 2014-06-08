@@ -9,7 +9,8 @@
 				</p>
 			</div>
 			<div class="image">
-				<img width="114px" data-ng-src="{{userDetails.lastfmProfileImage}}">
+				<img data-ng-if="userDetails.lastfmProfileImage" width="114px" data-ng-src="{{userDetails.lastfmProfileImage}}">
+				<img data-ng-if="!userDetails.lastfmProfileImage" src="/img/ajax-loader.gif" class="loading">
 			</div>
 			<div class="buttons">
 				<button class="btn btn-xs btn-danger" data-ng-click="logoutModal()">Logout</button>
