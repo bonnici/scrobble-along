@@ -46,7 +46,6 @@ angular.module('scrobbleAlong.controllers', []).
 					});
 				}
 
-				console.log("setting timeout");
 				$timeout(function() { updateStationsRecentTracks(); }, 200 * 1000); //todo change this to 20
 			});
 		};
