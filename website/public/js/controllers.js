@@ -4,11 +4,11 @@
 
 angular.module('scrobbleAlong.controllers', []).
 
-	controller('LoginCtrl', ['$scope', '$cookies', '$window', 'api', function($scope, $cookies, $window, api) {
+	controller('LoginCtrl', ['$scope', '$cookies', '$window', 'userManagement', function($scope, $cookies, $window, userManagement) {
 		$scope.loggedIn = $cookies.lastfmSession ? true : false;
 		$scope.userDetails = { isScrobbling: false };
 
-		api.getLoginUrl(function(url) {
+		userManagement.getLoginUrl(function(url) {
 			$scope.loginUrl = url;
 		});
 
@@ -20,7 +20,6 @@ angular.module('scrobbleAlong.controllers', []).
 
 		$scope.logoutModal = function() {
 			if ($scope.userDetails.isScrobbling) {
-				//$window.alert("modal here");
 				$('#logout-modal').modal();
 			}
 			else {
@@ -29,114 +28,80 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 	}]).
 
-	controller('IndexCtrl', ['$scope', '$http', '$cookies', '$interval', '$timeout', 'api',
-		function ($scope, $http, $cookies, $interval, $timeout, api) {
+	controller('IndexCtrl', ['$scope', '$timeout', 'userManagement', 'userDetails', 'stationDetails',
+		function ($scope, $timeout, userManagement, userDetailsSvc, stationDetailsSvc) {
 
 		$scope.stations = [];
 
-		// Updates the recent track names & images of a batch of stations and continues until all are loaded
-		var updateStationRecentTracksBatch = function(stationNames, batchSize) {
-			if (stationNames.length == 0) {
-				return;
-			}
-
-			var batch = stationNames.splice(0, batchSize);
-
-			api.getStationRecentTracks(batch, function(batchRecentTracks) {
-				angular.forEach($scope.stations, function(station) {
-					if (batchRecentTracks[station.lastfmUsername]) {
-						station.recentTracks = batchRecentTracks[station.lastfmUsername];
-					}
-				});
-
-				updateStationRecentTracksBatch(stationNames, batchSize);
-			});
-		};
-
-		// Updates the recent track names & images of all stations
-		var updateStationRecentTracks = function() {
+		var updateStationsRecentTracks = function() {
 			var stationNames = [];
 			angular.forEach($scope.stations, function(station) {
 				stationNames.push(station.lastfmUsername);
 			});
 
-			var batchSize = 10;
-			updateStationRecentTracksBatch(stationNames, batchSize);
-		};
+			stationDetailsSvc.getStationsRecentTracks(stationNames, function(stationsRecentTracks) {
+				if (stationsRecentTracks) {
+					angular.forEach($scope.stations, function(station) {
+						station.recentTracks = stationsRecentTracks[station.lastfmUsername];
+					});
+				}
 
-		// Updates the profile pic and tasteometer of a batch of stations and continues on to the next batch.
-		// Calls callback only when all batches are processed.
-		var updateStationLastfmInfoBatch = function(stationNames, batchSize, callback) {
-			if (stationNames.length == 0) {
-				callback();
-				return;
-			}
-
-			var batch = stationNames.splice(0, batchSize);
-
-			api.getStationLastfmInfo(batch, $scope.userDetails.lastfmUsername, function(batchLastfmInfos) {
-				angular.forEach($scope.stations, function(station) {
-					if (batchLastfmInfos[station.lastfmUsername]) {
-						angular.extend(station, batchLastfmInfos[station.lastfmUsername]);
-					}
-				});
-
-				updateStationLastfmInfoBatch(stationNames, batchSize, callback);
+				console.log("setting timeout");
+				$timeout(function() { updateStationsRecentTracks(); }, 200 * 1000); //todo change this to 20
 			});
 		};
 
-		// Updates the profile pic/tasteometer of all stations then starts updating the recent tracks
-		var updateStationLastfmInfo = function() {
-			var stationNames = [];
-			angular.forEach($scope.stations, function(station) {
-				stationNames.push(station.lastfmUsername);
-			});
-
-			var batchSize = 10;
-			updateStationLastfmInfoBatch(stationNames, batchSize, function() {
-				updateStationRecentTracks();
-
-				// Update recent tracks every 20 seconds
-				$interval(function() { updateStationRecentTracks(); }, 20 * 1000);
-			});
-		};
-
-
-		//todo change this to use promises?
-		api.getUserDetails(function(userDetails) {
+		userDetailsSvc.getUserDbInfo(function(userDetails) {
 			$scope.userDetails.lastfmUsername = userDetails.lastfmUsername;
 			var userListeningTo = userDetails.listeningTo;
 			var userScrobbles = userDetails.userScrobbles || {};
 
 			if ($scope.userDetails.lastfmUsername) {
-				api.getUserLastfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
-					if (userInfo.lastfmProfileImage) {
+				userDetailsSvc.getUserLfmInfo($scope.userDetails.lastfmUsername, function(userInfo) {
+					if (userInfo && userInfo.lastfmProfileImage) {
 						$scope.userDetails.lastfmProfileImage = userInfo.lastfmProfileImage;
 					}
 				});
 			}
 
-			api.getStationDetails(function(stationDetails) {
-				$scope.stations = stationDetails;
+			stationDetailsSvc.getAllStationsDbInfo(function(stationDbInfo) {
+				$scope.stations = stationDbInfo;
 
+				var stationNames = [];
 				angular.forEach($scope.stations, function(station) {
+					stationNames.push(station.lastfmUsername);
 					station.userScrobbles = userScrobbles[station.lastfmUsername] || 0;
 					station.tasteometer = 0; // Initial setting so sorting works while the page is loading
 					station.currentlyScrobbling = false;
 
-					if (station.lastfmUsername == userListeningTo) {
+					if (userListeningTo && station.lastfmUsername == userListeningTo) {
 						station.currentlyScrobbling = true;
 						$scope.userDetails.isScrobbling = true;
 					}
 				});
 
-				updateStationLastfmInfo();
+				stationDetailsSvc.getStationsLfmInfo(stationNames, function(stationsLfmInfo) {
+					if (stationsLfmInfo) {
+						angular.forEach($scope.stations, function(station) {
+							angular.extend(station, stationsLfmInfo[station.lastfmUsername]);
+						});
+					}
+				});
+
+				stationDetailsSvc.getStationsTasteometer(stationNames, $scope.userDetails.lastfmUsername, function(stationsTasteometer) {
+					if (stationsTasteometer) {
+						angular.forEach($scope.stations, function(station) {
+							station.tasteometer = stationsTasteometer[station.lastfmUsername] || 0;
+						});
+					}
+				});
+
+				updateStationsRecentTracks(); // Fires a timeout to re-update later
 			});
 		});
 
 		// Sorting of stations
 		$scope.changeStationSort = function(sort) {
-			console.log("sortStationsBy", sort);
 			$scope.sortStationsBy = sort;
 		};
 		$scope.sortStationsBy = $scope.loggedIn ? 'scrobbles' : 'lastfmUsername';
@@ -167,7 +132,7 @@ angular.module('scrobbleAlong.controllers', []).
 
 		$scope.stopScrobbling = function(station) {
 			if (station && station.lastfmUsername) {
-				api.stopScrobbling(station.lastfmUsername, function(err, status) {
+				userManagement.stopScrobbling(station.lastfmUsername, function(err, status) {
 					if (status) {
 						setCurrentlyScrobbling(null);
 					}
@@ -180,7 +145,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 		$scope.scrobbleAlong = function(station) {
 			if (station && station.lastfmUsername) {
-				api.scrobbleAlong(station.lastfmUsername, function(err, status) {
+				userManagement.scrobbleAlong(station.lastfmUsername, function(err, status) {
 					if (status) {
 						setCurrentlyScrobbling(station);
 					}
@@ -193,7 +158,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 	}]).
 
-	controller('AdminCtrl', ['$scope', 'api', function($scope, api) {
+	controller('AdminCtrl', ['$scope', 'adminInfo', function($scope, adminInfo) {
 		$scope.newStation = {};
 		var updates = [];
 		var addUpdate = function(update) {
@@ -202,7 +167,7 @@ angular.module('scrobbleAlong.controllers', []).
 		}
 
 		var loadUsers = function() {
-			api.getAllUsers(function(userDetails) {
+			adminInfo.getAllUsers(function(userDetails) {
 				$scope.allUserDetails = userDetails;
 
 				$scope.numUsers = 0;
@@ -217,7 +182,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		var loadStations = function() {
-			api.getAllStations(function(stationDetails) {
+			adminInfo.getAllStations(function(stationDetails) {
 				$scope.stationDetails = stationDetails;
 			});
 		};
@@ -226,7 +191,7 @@ angular.module('scrobbleAlong.controllers', []).
 		loadStations();
 
 		$scope.addStation = function() {
-			api.addStation($scope.newStation, function(err, status) {
+			adminInfo.addStation($scope.newStation, function(err, status) {
 				if (err) {
 					addUpdate("Error adding station " + $scope.newStation['_id'] + ": " + err);
 				}
@@ -239,7 +204,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		$scope.updateStation = function(station) {
-			api.updateStation(station, function(err, status) {
+			adminInfo.updateStation(station, function(err, status) {
 				if (err) {
 					addUpdate("Error updating station " + station['_id'] + ": " + err);
 				}
@@ -251,7 +216,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		$scope.clearUserListening = function(user, reload, callback) {
-			api.clearUserListening(user['_id'], function(err, status) {
+			adminInfo.clearUserListening(user['_id'], function(err, status) {
 				if (err) {
 					addUpdate(err);
 				}
@@ -270,7 +235,7 @@ angular.module('scrobbleAlong.controllers', []).
 		};
 
 		$scope.clearUserSession = function(user, reload, callback) {
-			api.clearUserSession(user['_id'], function(err, status) {
+			adminInfo.clearUserSession(user['_id'], function(err, status) {
 				if (err) {
 					addUpdate(err);
 				}

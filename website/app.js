@@ -99,6 +99,7 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	app.get('/api/stations', api.stations);
 	app.get('/api/user-lastfm-info', api.userLastfmInfo);
 	app.get('/api/station-lastfm-info', api.stationLastfmInfo);
+	app.get('/api/station-lastfm-tasteometer', api.stationLastfmTasteometer);
 	app.get('/api/station-lastfm-recenttracks', api.stationLastfmRecentTracks);
 
 	app.post('/api/stop-scrobbling', api.stopScrobbling);

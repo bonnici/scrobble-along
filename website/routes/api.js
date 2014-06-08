@@ -114,68 +114,58 @@ exports.stationLastfmInfo = function(req, res) {
 		return;
 	}
 
-	//var stationDetails = {};
-
-	var tasteometerData = [];
-		if (req.query.user) {
-		_.each(stations, function(station) {
-			tasteometerData.push({ user1: req.query.user, user2: station });
-		});
-	}
-
-	async.parallel([
-		function(callback) {
-			var stationDetails = {};
-			async.map(stations, lastfmDao.getUserInfo, function(err, results) {
-				if (err || results.length != stations.length) {
-					winston.error("Error getting user info for stations:", err);
-					callback(err);
-					return;
-				}
-
-				for (var i=0; i < stations.length; i++) {
-					stationDetails[stations[i]] = results[i];
-				}
-
-				callback(null, stationDetails);
-			});
-		},
-
-		function(callback) {
-			var tasteometerResults = {};
-			async.map(tasteometerData, lastfmDao.getTasteometer, function(err, results) {
-				if (err || results.length != tasteometerData.length) {
-					winston.error("Error getting tasteometer:", err);
-					callback(err);
-					return;
-				}
-
-				for (var i=0; i < tasteometerData.length; i++) {
-					tasteometerResults[tasteometerData[i].user2] = results[i] * 100; // convert to percentage
-				}
-
-				callback(null, tasteometerResults);
-			});
-		}
-	], function(err, results) {
-		if (!results || !results.size == 2) {
-			callback("Unexpected result from async.parallel");
+	var stationDetails = {};
+	async.map(stations, lastfmDao.getUserInfo, function(err, results) {
+		if (err) {
+			winston.error("Error getting station last.fm details:", err);
+			res.status(500).send('Error getting station last.fm details');
 			return;
 		}
-		var combinedResults = results[0];
-		_.each(results[1], function(tasteometerInfo, stationName) {
-			if (combinedResults[stationName]) {
-				combinedResults[stationName].tasteometer = tasteometerInfo;
-			}
-			else {
-				//todo log?
-				combinedResults[stationName] = { tasteometer: tasteometerInfo };
-			}
-		});
-		res.json(combinedResults);
+
+		if (results.length != stations.length) {
+			winston.warn("Couldn't get LastFM details for all stations", { stations: stations, results: results });
+		}
+
+		for (var i=0; i < stations.length; i++) {
+			stationDetails[stations[i]] = results[i];
+		}
+
+		res.json(stationDetails);
 	});
 };
 
+exports.stationLastfmTasteometer = function(req, res) {
+	if (!req.query || !req.query.stations || !req.query.user) {
+		res.json([]);
+		return;
+	}
+
+	var stations = req.query.stations.split(",");
+	if (stations.length == 0) {
+		res.json([]);
+		return;
+	}
+
+	var tasteometerData = [];
+	_.each(stations, function(station) {
+		tasteometerData.push({ user1: req.query.user, user2: station });
+	});
+
+	var tasteometerResults = {};
+	async.map(tasteometerData, lastfmDao.getTasteometer, function(err, results) {
+		if (err || results.length != tasteometerData.length) {
+			winston.error("Error getting tasteometer:", err);
+			res.status(500).send('Error getting station last.fm tasteometer');
+			return;
+		}
+
+		for (var i=0; i < tasteometerData.length; i++) {
+			tasteometerResults[tasteometerData[i].user2] = results[i] * 100; // convert to percentage
+		}
+
+		res.json(tasteometerResults);
+	});
+};
 
 exports.stationLastfmRecentTracks = function(req, res) {
 	if (!req.query || !req.query.stations) {
