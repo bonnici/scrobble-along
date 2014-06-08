@@ -3,6 +3,8 @@ extends layout
 block body
 	div(data-ng-controller='IndexCtrl')
 
+		div.alert.alert-danger(data-ng-if='alertMessage') {{ alertMessage }}
+
 		div.jumbotron(data-ng-if='!loggedIn')
 			h2.text-center Scrobble Along
 			p.text-center.

@@ -1,7 +1,6 @@
 var _ = require("underscore");
 var winston = require("winston");
 
-//todo more logging
 var MongoDao = (function () {
 	function MongoDao(userCrypter, stationCrypter, dbClient) {
 		this.userCrypter = userCrypter;
@@ -164,9 +163,6 @@ var MongoDao = (function () {
 			callback("Invalid station");
 			return;
 		}
-
-		winston.info("station.disabled");
-		winston.info(station.disabled);
 
 		var crypter = this.stationCrypter;
 

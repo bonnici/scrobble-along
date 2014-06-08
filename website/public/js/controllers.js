@@ -42,7 +42,7 @@ angular.module('scrobbleAlong.controllers', []).
 			stationDetailsSvc.getStationsRecentTracks(stationNames, function(stationsRecentTracks) {
 				if (stationsRecentTracks) {
 					angular.forEach($scope.stations, function(station) {
-						station.recentTracks = stationsRecentTracks[station.lastfmUsername];
+						station.recentTracks = stationsRecentTracks[station.lastfmUsername] || [];
 					});
 				}
 
@@ -77,6 +77,7 @@ angular.module('scrobbleAlong.controllers', []).
 					station.userScrobbles = userScrobbles[station.lastfmUsername] || 0;
 					station.tasteometer = null; // Initial setting so sorting works while the page is loading
 					station.currentlyScrobbling = false;
+					station.recentTracks = null;
 
 					if (userListeningTo && station.lastfmUsername == userListeningTo) {
 						station.currentlyScrobbling = true;
@@ -142,10 +143,10 @@ angular.module('scrobbleAlong.controllers', []).
 				userManagement.stopScrobbling(station.lastfmUsername, function(err, status) {
 					if (status) {
 						setCurrentlyScrobbling(null);
+						$scope.alertMessage = null;
 					}
 					else {
-						//todo error message
-						alert("Error stopping scrobble: " + err);
+						$scope.alertMessage = "Error stopping scrobble, please wait a few moments and try again.";
 					}
 				});
 			}
@@ -155,10 +156,10 @@ angular.module('scrobbleAlong.controllers', []).
 				userManagement.scrobbleAlong(station.lastfmUsername, function(err, status) {
 					if (status) {
 						setCurrentlyScrobbling(station);
+						$scope.alertMessage = null;
 					}
 					else {
-						//todo error message
-						alert("Error scrobbling along: " + err);
+				        $scope.alertMessage = "Error scrobbling along, please wait a few moments and try again.";
 					}
 				});
 			}

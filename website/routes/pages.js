@@ -47,7 +47,6 @@ exports.login = function(req, res) {
 	var token = req.query['token'];
 	if (!token) {
 		winston.error("Token was not found during login");
-		//todo send message to user?
 		res.redirect("/");
 		return;
 	}
@@ -55,7 +54,6 @@ exports.login = function(req, res) {
 	lastfmDao.getSession(token, function(err, session) {
 		if (err || !session) {
 			winston.error("Error getting session:", err);
-			//todo send message to user?
 			res.redirect("/");
 			return;
 		}
@@ -65,13 +63,12 @@ exports.login = function(req, res) {
 		mongoDao.storeUserSession(session.user, encrpytedSession, function(err) {
 			if (err) {
 				winston.error("Error storing user session:", err);
-				//todo send message to user?
 			}
 			else {
 				res.cookie('lastfmSession', encrpytedSession, { maxAge: 30*24*60*60*1000 }); // max age = 30 days
 				winston.info("Successfully stored session for user " + session.user)
 			}
-			res.redirect("/"); //todo disable 304?
+			res.redirect("/");
 		});
 	});
 };

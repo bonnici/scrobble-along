@@ -36,7 +36,7 @@ var app = express();
 app.set('port', process.env.PORT);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
-app.use(express.logger('dev')); //todo remove dev?
+app.use(express.logger('dev'));
 app.use(express.favicon(path.join(__dirname, '/public/img/favicon.ico')));
 app.use(express.json());
 app.use(express.urlencoded());
@@ -113,8 +113,6 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	app.post('/api/admin/clear-listening', api.clearUserListening);
 	app.post('/api/admin/clear-session', api.clearUserSession);
 
-	//todo show 404 message/page for other URLs
-
 	// Start Server
 	http.createServer(app).listen(PORT, function () {
 		winston.info('Express server listening on port ' + PORT);
@@ -123,15 +121,10 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-cache lastfm/mongo calls
-better server-side error logs
-show some errors to user
-fix memory leak?
-change hrefs to ng-href?
+cache lastfm/mongo calls, change timeout to 20s
 animation for station transitions
-stop angular from popping things in and out (e.g. logout button)
-
-disable angular logs in production
 minification
+deploy & test - check logs on site and server
+
 time out scrobbling
 */

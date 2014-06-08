@@ -1,7 +1,7 @@
 <div class="lastfm-tile lastfm-tile-station">
 	<div class="name-image-buttons">
 		<div class="username">
-			<p><a href="http://www.last.fm/user/{{station.lastfmUsername}}" target="_blank">{{station.lastfmUsername}}</a></p>
+			<p><a data-ng-href="http://www.last.fm/user/{{station.lastfmUsername}}" target="_blank">{{station.lastfmUsername}}</a></p>
 		</div>
 		<div class="image">
 			<img data-ng-if="station.lastfmProfileImage" width="114px" data-ng-src="{{station.lastfmProfileImage}}">
@@ -27,7 +27,7 @@
 		</div>
 		<div class="recent-tracks">
 			Recent Tracks <br/>
-			<img data-ng-if="!station.recentTracks" src="/img/ajax-loader.gif" class="loading">
+			<img data-ng-if="station.recentTracks === null" src="/img/ajax-loader.gif" class="loading">
 
 			<div data-ng-repeat="track in station.recentTracks | limitTo:3" class="track-row">
 				<div class="track-image">

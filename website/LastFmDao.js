@@ -1,6 +1,5 @@
 var _ = require("underscore");
 
-//todo more logging
 var LastFmDao = (function () {
 	var lastfmNode;
 	function LastFmDao(lfmNode) {
