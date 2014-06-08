@@ -46,6 +46,7 @@ import radio2Nl = require("./scrapers/Radio2NLScraper");
 import kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
 import doubleJ = require("./scrapers/DoubleJScraper");
 import amazing = require("./scrapers/AmazingRadioScraper");
+import rockFm = require("./scrapers/RockFmScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -120,7 +121,8 @@ var scrapers:{ [index: string]: scrap.Scraper; } = {
 	WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
 	WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7"),
 	WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8"),
-	Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9")
+	Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9"),
+	RockFM: new rockFm.RockFmScraper("RockFM")
 };
 
 //////////////
@@ -199,7 +201,6 @@ setInterval(
 //////////////
 // Scrobbler that scrapes but does not scrobble and uses fake stations & users
 //////////////
-
 /*
 var stations = [
 	{ StationName: "KEXP903FM", ScraperName: "KEXP", Session: "KEXP903FMSession" },
@@ -265,7 +266,8 @@ var stations = [
 	{ StationName: "WFMUIchiban", ScraperName: "WFMUIchiban", Session: "WFMUIchibanSession" },
 	{ StationName: "WFMUUbu", ScraperName: "WFMUUbu", Session: "WFMUUbuSession" },
 	{ StationName: "doublejradio", ScraperName: "DoubleJ", Session: "DoubleJSession" },
-	{ StationName: "sonarfm", ScraperName: "Sonar", Session: "SonarSession" }
+	{ StationName: "sonarfm", ScraperName: "Sonar", Session: "SonarSession" },
+    { StationName: "RockFMUK", ScraperName: "RockFM", Session: "RockFMSession" }
 ];
 
 var usersListening:{[index: string]:usr.User[]} = {

@@ -45,6 +45,7 @@ var radio2Nl = require("./scrapers/Radio2NLScraper");
 var kloveAir1 = require("./scrapers/KLoveAir1RadioScraper");
 var doubleJ = require("./scrapers/DoubleJScraper");
 var amazing = require("./scrapers/AmazingRadioScraper");
+var rockFm = require("./scrapers/RockFmScraper");
 
 // Required environment variables
 var STATION_CRYPTO_KEY = process.env.SA_STATION_CRYPTO_KEY;
@@ -117,7 +118,8 @@ var scrapers = {
     WFMUIchiban: new wfmu.WfmuScraper("WFMUIchiban", "6"),
     WFMUUbu: new wfmu.WfmuScraper("WFMUUbu", "7"),
     WFMUBored: new wfmu.WfmuScraper("WFMUBored", "8"),
-    Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9")
+    Sonar: new mediaStream.MediaStreamScraper("Sonar", "4f34676f86d21c6572001ab9"),
+    RockFM: new rockFm.RockFmScraper("RockFM")
 };
 
 //////////////
