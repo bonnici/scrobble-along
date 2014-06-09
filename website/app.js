@@ -123,8 +123,8 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-animation for station transitions
 deploy & test - check logs on site and server
+ - make 2 separate submodules, use git to deploy website submodule
 
 time out scrobbling
 */
