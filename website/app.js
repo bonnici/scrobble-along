@@ -4,6 +4,7 @@ var path = require('path');
 var winston = require('winston');
 var lastfm = require("lastfm");
 var mongodb = require("mongodb");
+var memjs = require("memjs");
 
 var crypt = require("./common/Crypter");
 var lfmDao = require("./LastFmDao");
@@ -81,9 +82,10 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 	}
 
 	var mongoDao = new mngDao.MongoDao(userCrypter, stationCrypter, dbClient);
+	var cacheClient = memjs.Client.create();
 
 	pages.init(userCrypter, lastfmDao, mongoDao);
-	api.init(lastfmDao, mongoDao);
+	api.init(lastfmDao, mongoDao, cacheClient);
 
 	// Routes
 
@@ -121,9 +123,7 @@ mongodb.connect(MONGO_URI, function (err, dbClient) {
 
 /*
 todo
-cache lastfm/mongo calls, change timeout to 20s
 animation for station transitions
-minification
 deploy & test - check logs on site and server
 
 time out scrobbling

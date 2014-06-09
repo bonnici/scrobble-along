@@ -8,10 +8,12 @@ var winston = require("winston");
 
 var lastfmDao = null;
 var mongoDao = null;
+var cacheClient = null;
 
-exports.init = function(lfm, mng) {
+exports.init = function(lfm, mng, cache) {
 	lastfmDao = lfm;
 	mongoDao = mng;
+	cacheClient = cache;
 };
 
 exports.loginUrl = function (req, res) {
@@ -59,29 +61,49 @@ exports.userDetails = function (req, res) {
 
 };
 
-exports.stations = function (req, res) {
-	mongoDao.getStations(function (err, stationArray) {
-		if (err) {
-			winston.error("Error loading stations:", err);
-			res.status(500).send('Error loading stations from database');
-		}
-		else if (!stationArray) {
-			winston.error("Invalid station records:", stationArray);
-			res.status(500).send('Invalid result from database');
+var cacheRespond = function(key, expires, res, callback) {
+	cacheClient.get(key, function(err, value) {
+		if (value) {
+			winston.info("Returning from cache", { key:key, value:value.toString() });
+			res.setHeader('Content-Type', 'application/json');
+			res.send(value.toString());
 		}
 		else {
-			var stations = [];
-			_.each(stationArray, function(record) {
-				if (record && record['_id'] && record['disabled'] != "true") {
-					stations.push({
-						lastfmUsername: record['_id'],
-						stationUrl: record['stationUrl'],
-						streamUrl: record['streamUrl']
-					});
-				}
+			callback(function(data) {
+				winston.info("Updating cache", { key:key, value:data, expires:expires });
+				cacheClient.set(key, JSON.stringify(data), null, expires);
 			});
-			res.json(stations);
 		}
+	});
+};
+
+exports.stations = function (req, res) {
+	cacheRespond("all-stations", 60*60, res, function(updateCallback) {
+		mongoDao.getStations(function (err, stationArray) {
+			if (err) {
+				winston.error("Error loading stations:", err);
+				res.status(500).send('Error loading stations from database');
+			}
+			else if (!stationArray) {
+				winston.error("Invalid station records:", stationArray);
+				res.status(500).send('Invalid result from database');
+			}
+			else {
+				var stations = [];
+				_.each(stationArray, function(record) {
+					if (record && record['_id'] && record['disabled'] != "true") {
+						stations.push({
+							lastfmUsername: record['_id'],
+							stationUrl: record['stationUrl'],
+							streamUrl: record['streamUrl']
+						});
+					}
+				});
+
+				updateCallback(stations);
+				res.json(stations);
+			}
+		});
 	});
 };
 
@@ -91,14 +113,18 @@ exports.userLastfmInfo = function(req, res) {
 		return;
 	}
 
-	lastfmDao.getUserInfo(req.query.user, function(err, details) {
-		if (err || !details.lastfmProfileImage) {
-			winston.error("Error getting user info for user:", err);
-			res.status(500).send('Error loading user last.fm details');
-		}
-		else {
-			res.json({ lastfmProfileImage: details.lastfmProfileImage });
-		}
+	cacheRespond("user-lastfm-" + req.query.user, 60*60, res, function(updateCallback) {
+		lastfmDao.getUserInfo(req.query.user, function(err, details) {
+			if (err || !details.lastfmProfileImage) {
+				winston.error("Error getting user info for user:", err);
+				res.status(500).send('Error loading user last.fm details');
+			}
+			else {
+				var result = { lastfmProfileImage: details.lastfmProfileImage };
+				updateCallback(result);
+				res.json(result);
+			}
+		});
 	});
 };
 
@@ -114,23 +140,26 @@ exports.stationLastfmInfo = function(req, res) {
 		return;
 	}
 
-	var stationDetails = {};
-	async.map(stations, lastfmDao.getUserInfo, function(err, results) {
-		if (err) {
-			winston.error("Error getting station last.fm details:", err);
-			res.status(500).send('Error getting station last.fm details');
-			return;
-		}
+	cacheRespond("station-lastfm-info-" + req.query.stations, 60*60, res, function(updateCallback) {
+		var stationDetails = {};
+		async.map(stations, lastfmDao.getUserInfo, function(err, results) {
+			if (err) {
+				winston.error("Error getting station last.fm details:", err);
+				res.status(500).send('Error getting station last.fm details');
+				return;
+			}
 
-		if (results.length != stations.length) {
-			winston.warn("Couldn't get LastFM details for all stations", { stations: stations, results: results });
-		}
+			if (results.length != stations.length) {
+				winston.warn("Couldn't get LastFM details for all stations", { stations: stations, results: results });
+			}
 
-		for (var i=0; i < stations.length; i++) {
-			stationDetails[stations[i]] = results[i];
-		}
+			for (var i=0; i < stations.length; i++) {
+				stationDetails[stations[i]] = results[i];
+			}
 
-		res.json(stationDetails);
+			updateCallback(stationDetails);
+			res.json(stationDetails);
+		});
 	});
 };
 
@@ -146,24 +175,27 @@ exports.stationLastfmTasteometer = function(req, res) {
 		return;
 	}
 
-	var tasteometerData = [];
-	_.each(stations, function(station) {
-		tasteometerData.push({ user1: req.query.user, user2: station });
-	});
+	cacheRespond("station-lastfm-tasteometer-" + req.query.user + "-" + req.query.stations, 60*60, res, function(updateCallback) {
+		var tasteometerData = [];
+		_.each(stations, function(station) {
+			tasteometerData.push({ user1: req.query.user, user2: station });
+		});
 
-	var tasteometerResults = {};
-	async.map(tasteometerData, lastfmDao.getTasteometer, function(err, results) {
-		if (err || results.length != tasteometerData.length) {
-			winston.error("Error getting tasteometer:", err);
-			res.status(500).send('Error getting station last.fm tasteometer');
-			return;
-		}
+		var tasteometerResults = {};
+		async.map(tasteometerData, lastfmDao.getTasteometer, function(err, results) {
+			if (err || results.length != tasteometerData.length) {
+				winston.error("Error getting tasteometer:", err);
+				res.status(500).send('Error getting station last.fm tasteometer');
+				return;
+			}
 
-		for (var i=0; i < tasteometerData.length; i++) {
-			tasteometerResults[tasteometerData[i].user2] = results[i] * 100; // convert to percentage
-		}
+			for (var i=0; i < tasteometerData.length; i++) {
+				tasteometerResults[tasteometerData[i].user2] = results[i] * 100; // convert to percentage
+			}
 
-		res.json(tasteometerResults);
+			updateCallback(tasteometerResults);
+			res.json(tasteometerResults);
+		});
 	});
 };
 
@@ -179,19 +211,22 @@ exports.stationLastfmRecentTracks = function(req, res) {
 		return;
 	}
 
-	var recentTracks = {};
-	async.map(stations, lastfmDao.getRecentTracks, function(err, results) {
-		if (err || results.length != stations.length) {
-			winston.error("Error getting recent tracks:", err);
-			res.status(500).send('Unexpected results while getting station\'s recent tracks');
-			return;
-		}
+	cacheRespond("station-lastfm-recenttracks-" + req.query.stations, 19, res, function(updateCallback) {
+		var recentTracks = {};
+		async.map(stations, lastfmDao.getRecentTracks, function(err, results) {
+			if (err || results.length != stations.length) {
+				winston.error("Error getting recent tracks:", err);
+				res.status(500).send('Unexpected results while getting station\'s recent tracks');
+				return;
+			}
 
-		for (var i=0; i < stations.length; i++) {
-			recentTracks[stations[i]] = results[i];
-		}
+			for (var i=0; i < stations.length; i++) {
+				recentTracks[stations[i]] = results[i];
+			}
 
-		res.json(recentTracks);
+			updateCallback(recentTracks);
+			res.json(recentTracks);
+		});
 	});
 };
 
