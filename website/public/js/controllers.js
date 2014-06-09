@@ -111,7 +111,20 @@ angular.module('scrobbleAlong.controllers', []).
 
 		// Sorting of stations
 		$scope.changeStationSort = function(sort) {
-			$scope.sortStationsBy = sort;
+			// Need to show/hide during re-sort like this since the move animation doesn't work as expected
+			var stations = $scope.stations;
+			var scrobblingStation = null;
+			angular.forEach($scope.stations, function(curStation) {
+				if (curStation.currentlyScrobbling) {
+					scrobblingStation = curStation;
+				}
+			});
+			$scope.stations = [scrobblingStation];
+
+			$timeout(function() {
+				$scope.sortStationsBy = sort;
+				$scope.stations = stations;
+			}, 50);
 		};
 		$scope.sortStationsBy = $scope.loggedIn ? 'scrobbles' : 'lastfmUsername';
 		$scope.sortStations = function(station) {

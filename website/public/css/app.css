@@ -176,3 +176,23 @@ p#continue-scrobbling-note {
 	font-style: italic;
 	display: none;
 }
+
+.station-tile.ng-enter,
+.station-tile.ng-leave {
+	-webkit-transition: 0.15s linear all;
+	transition: 0.15s linear all;
+}
+
+.station-tile.ng-enter {
+	opacity:0;
+}
+.station-tile.ng-enter.ng-enter-active {
+	opacity:1;
+}
+
+.station-tile.my-repeat-animation.ng-leave {
+	opacity:1;
+}
+.station-tile.ng-leave.ng-leave-active {
+	opacity:0;
+}
