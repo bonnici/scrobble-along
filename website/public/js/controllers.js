@@ -42,7 +42,9 @@ angular.module('scrobbleAlong.controllers', []).
 			stationDetailsSvc.getStationsRecentTracks(stationNames, function(stationsRecentTracks) {
 				if (stationsRecentTracks) {
 					angular.forEach($scope.stations, function(station) {
-						station.recentTracks = stationsRecentTracks[station.lastfmUsername] || [];
+						if (station.lastfmUsername in stationsRecentTracks) {
+							station.recentTracks = stationsRecentTracks[station.lastfmUsername];
+						}
 					});
 				}
 
