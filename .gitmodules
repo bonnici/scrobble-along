@@ -1,0 +1,6 @@
+[submodule "scrobble-along-website"]
+	path = scrobble-along-website
+	url = https://github.com/bonnici/scrobble-along-website
+[submodule "scrobble-along-scrobbler"]
+	path = scrobble-along-scrobbler
+	url = https://github.com/bonnici/scrobble-along-scrobbler
